@@ -6,10 +6,10 @@ class DFBTATests(unittest.TestCase):
     def testFinalStatesNotSubset(self):
         self.assertRaises(ValueError, DFBTA, [], ["qA"], [], [])
 
-    #Raises error if DFBTA's rules contain states or symbols not present in the DFBTA's states or symbols
-    def testNewStatesSymbolsInRule(self):
-        self.assertRaises(ValueError, DFBTA, ["qA"], [], ["A"], [(("qA"), "A"),(("qB"), "A")])
-        self.assertRaises(ValueError, DFBTA, ["qA"], [], ["A"], [(("qA"), "A"),(("qA"), "B")])
+    #Raises error if DFBTA's transitions contain states or symbols not present in the DFBTA's states or symbols
+    def testNewStatesSymbolsInTransitions(self):
+        self.assertRaises(ValueError, DFBTA, ["qA"], [], ["A"], {(("qA"), "A"): "qA",(("qB"), "A"): "qA"})
+        self.assertRaises(ValueError, DFBTA, ["qA"], [], ["A"], {(("qA"), "A"): "qA",(("qA"), "B"): "qA"})
 
 
 if __name__ == '__main__':
