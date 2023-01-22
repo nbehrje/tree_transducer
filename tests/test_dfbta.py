@@ -1,6 +1,4 @@
 import unittest
-import sys
-print(sys.path)
 from src.DFBTA import DFBTA
 
 class DFBTATests(unittest.TestCase):
