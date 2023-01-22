@@ -1,11 +1,11 @@
 """
-dfbta module
+Deterministic Bottom-up Tree Automaton Module
 """
 from collections.abc import Iterable
 
 class DFBTA:
     """
-    Deterministic bottom-up finite-state automaton
+    Deterministic bottom-up finite-state tree automaton
     """
 
     def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, rules: Iterable[tuple]):
@@ -21,19 +21,26 @@ class DFBTA:
             rules:
                 An iterable of tuples containing the set of rules (Delta)
 
-        Returns:
-            A deterministic finite state tree automaton
+        Raises:
+            ValueError: The DFBTA is not properly defined.
         """
         self.states = set(states)
         self.final_states = set(final_states)
         self.symbols = set(symbols)
         self.rules = set(rules)
 
-        self.validate_input(states, final_states, symbols, rules)
+        self.validate_input()
 
-    def validate_input(self, states: set, final_states: set, symbols: set, rules: set[tuple]):
-        self.validate_states(states, final_states)
+    def validate_input(self):
+        #Verify states
+        if not self.final_states.issubset(self.states):
+            raise ValueError("final_states must be a subset of states.")
 
-    def validate_states(self, states: set, final_states: set):
-        if not states:
-            raise ValueError("states must not be empty")
+        #Verify rules
+        rules_unzipped = list(zip(*self.rules))
+        rules_states = set(rules_unzipped[0])
+        rules_symbols = set(rules_unzipped[1])
+        if not rules_states.issubset(self.states):
+            raise ValueError(f"DFBTA's rules contain state(s) not present in DFBTA's states: {rules_states - self.states}")
+        if not rules_symbols.issubset(self.symbols):
+            raise ValueError(f"DFBTA's rules contain symbol(s) not present in DFBTA's symbols: {rules_symbols - self.symbols}")
