@@ -2,15 +2,17 @@
 Deterministic Bottom-up Tree Automaton Module
 """
 from collections.abc import Iterable
-import src.Tree as Tree
+from ..Tree import Tree
+from .TreeAutomaton import TreeAutomaton
 
-class DFBTA:
+class DBTA(TreeAutomaton):
     """
     Deterministic bottom-up finite-state tree automaton
     """
 
     def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, transitions: dict):
-        """Creates a deterministic finite state tree automaton
+        """
+        Creates a deterministic finite-state bottom-up tree automaton
         
         Args:
             states: An Iterable containing the set of states (Q)
@@ -19,17 +21,13 @@ class DFBTA:
             transitions: A dict containing the transitions (Delta)
 
         Raises:
-            ValueError: The DFBTA is not properly defined.
+            ValueError: The DBTA is not properly defined.
         """
-        self.states = set(states)
-        self.final_states = set(final_states)
-        self.symbols = set(symbols)
-        self.transitions = transitions
-            
-        self._validate_input()
+        super().__init__(states, final_states, symbols, transitions)
 
     def _validate_input(self):
-        """Verifies that the arguments passed to init produce a well-defined automaton
+        """
+        Verifies that the arguments passed to init produce a well-defined automaton
         
         Raises:
             ValueError: The DFBTA is not properly defined.
@@ -46,27 +44,15 @@ class DFBTA:
         if not transitions_symbols.issubset(self.symbols):
             raise ValueError(f"DFBTA's transitions contain symbol(s) not present in DFBTA's symbols: {transitions_symbols - self.symbols}")
 
-    def accepts(self, tree: Tree) -> bool:
-        """Checks whether a tree is accepted by the DFBTA
-
-        Args:
-            tree: The candidate Tree.
-
-        Returns:
-            bool: True if the DFBTA accepts the tree and False otherwise.
-        """
-        final_state = self._accept_helper(tree)
-        return final_state in self.final_states
-
     def _accept_helper(self, tree: Tree):
-        """Recursive helper for accept()
+        """
+        Recursive helper for accept()
 
         Args:
             tree: The candidate Tree.
 
         Returns:
-            The state of the input Tree when processed by the utomaton
+            The state of the input Tree when processed by the automaton
         """
         child_states = tuple(self._accept_helper(c) for c in tree.children)
         return self.transitions.get((child_states, tree.value), None)
-
