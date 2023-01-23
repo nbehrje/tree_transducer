@@ -7,20 +7,36 @@ class Tree:
     Creates a Tree
 
     Args:
-        node:
-            The value of the tree node
+        value:
+            The value of the data stored in the tree
         children:
             A list of the tree's children
 
     Raises:
-        ValueError: node has None type and children is not empty
+        ValueError: value has None type and children is not empty
     """
-    def __init__(self, node, children: list):
-        self.node = node
+    def __init__(self, value, children: list = []):
+        self.value = value
         self.children = children
 
-        self.validate_input()
+        self._validate_input()
 
-    def validate_input(self):
-        if self.node is None and len(self.children):
-            raise ValueError("Tree with children has node type of None.")
+    def _validate_input(self):
+        """Verifies that the arguments passed to init produce a well-defined tree
+        
+        Raises:
+            ValueError: The tree's value has type None but the list of children is not empty.
+        """
+        if self.value is None and len(self.children):
+            raise ValueError("Tree with children has value type of None.")
+
+    def is_leaf(self) -> bool:
+        """Returns whether the tree is a leaf
+        
+        Returns:
+            bool: True if the tree is a leaf and False otherwise.
+        """
+        return not self.children
+
+    def __str__(self) -> str:
+        return f"{self.value}({','.join(str(c) for c in self.children)})"
