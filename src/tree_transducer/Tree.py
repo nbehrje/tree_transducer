@@ -53,3 +53,6 @@ class Tree:
 
     def __str__(self) -> str:
         return f"{self.value}({','.join(str(c) for c in self.children)})"
+
+    def __nonzero__(self) -> bool:
+        return self.value is not None

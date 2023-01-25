@@ -40,9 +40,22 @@ class DBTA(TreeAutomaton):
         transitions_states = set(sum({k[0] for k in self.transitions.keys()}, ())).union(set(self.transitions.values()))
         transitions_symbols = {k[1] for k in self.transitions.keys()}
         if not transitions_states.issubset(self.states):
-            raise ValueError(f"DFBTA's transitions contain state(s) not present in DFBTA's states: {transitions_states - self.states}")
+            raise ValueError(f"DBTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_symbols.issubset(self.symbols):
-            raise ValueError(f"DFBTA's transitions contain symbol(s) not present in DFBTA's symbols: {transitions_symbols - self.symbols}")
+            raise ValueError(f"DBTA's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
+
+    def accepts(self, tree: Tree) -> bool:
+        """
+        Checks whether a tree is accepted by the automaton
+
+        Args:
+            tree: The candidate Tree.
+
+        Returns:
+            bool: True if the DBTA accepts the tree and False otherwise.
+        """
+        final_state = self._accept_helper(tree)
+        return final_state in self.final_states
 
     def _accept_helper(self, tree: Tree):
         """

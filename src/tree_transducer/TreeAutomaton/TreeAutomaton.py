@@ -25,14 +25,20 @@ class TreeAutomaton:
             
         self._validate_input()
 
+    def _validate_input(self):
+        """
+        Verifies that the arguments passed to init produce a well-defined automaton.
+        This method is intended to be overridden by subclasses of TreeAutomaton.
+        """
+        raise NotImplementedError
+
     def accepts(self, tree: Tree) -> bool:
-        """Checks whether a tree is accepted by the automaton
+        """
+        Checks whether a tree is accepted by the automaton
 
         Args:
             tree: The candidate Tree.
 
-        Returns:
-            bool: True if the DFBTA accepts the tree and False otherwise.
+        This method is intended to be overridden by subclasses of TreeAutomaton.
         """
-        final_state = self._accept_helper(tree)
-        return final_state in self.final_states
+        raise NotImplementedError
