@@ -38,8 +38,12 @@ class DTTA(TreeAutomaton):
             raise ValueError("final_states must be a subset of states.")
 
         #Verify transitions
-        transitions_states = {k[0] for k in self.transitions.keys()}.union(set(sum(self.transitions.values(),())))
-        transitions_symbols = {k[1] for k in self.transitions.keys()}
+        transitions_states = set()
+        transitions_symbols = set()
+        for (k, v) in self.transitions.items():
+            transitions_states.update(set(v))
+            transitions_states.add(k[0])
+            transitions_symbols.add(k[1])
         if not transitions_states.issubset(self.states):
             raise ValueError(f"DTTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_symbols.issubset(self.symbols):
