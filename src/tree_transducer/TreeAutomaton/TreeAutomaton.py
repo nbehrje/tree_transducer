@@ -1,12 +1,12 @@
 """
-Tree Automaton class
+Tree Automaton module
 """
 from collections.abc import Iterable
 from ..Tree import Tree
 
 class TreeAutomaton:
     """
-    Tree automaton module. The types of tree automata inherit from this.
+    Tree automaton class. The types of tree automata inherit from this.
     """
 
     def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, transitions: dict):

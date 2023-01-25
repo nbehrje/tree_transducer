@@ -5,7 +5,7 @@ from src.tree_transducer.Tree import Tree
 class DTTATests(unittest.TestCase):
     #Raises error if DTTA's final states is not a subset of the DTTA's states
     def testFinalStatesNotSubset(self):
-        self.assertRaises(ValueError, DTTA, [], ["qA"], [], [])
+        self.assertRaises(ValueError, DTTA, [], ["qA"], [], {})
 
     #Raises error if DTTA's transitions contain states or symbols not present in the DTTA's states or symbols
     def testNewStatesSymbolsInTransitions(self):

@@ -1,6 +1,7 @@
 """
 Tree module
 """
+from __future__ import annotations
 
 class Tree:
     """
@@ -51,8 +52,35 @@ class Tree:
             return sum([c.term_yield() for c in self.children],[])
         return [self.value]
 
+    def fill(self, trees: tuple) -> Tree:
+        self.children = [c.fill(trees) for c in self.children]
+        return self
+
     def __str__(self) -> str:
+        return f"{self.value}({','.join(str(c) for c in self.children)})"
+
+    def __repr__(self) -> str:
         return f"{self.value}({','.join(str(c) for c in self.children)})"
 
     def __nonzero__(self) -> bool:
         return self.value is not None
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Tree):
+            return self.value == other.value and self.children == other.children
+        return False
+
+class VarLeaf(Tree):
+    def __init__(self, idx):
+        self.idx = idx
+
+    def fill(self, trees: tuple):
+        if self.idx > len(trees):
+            raise IndexError("VarLeaf index greater than length of filling trees")
+        return trees[self.idx]
+
+    def __str__(self) -> str:
+        return f"Var({self.idx})"
+
+    def __repr__(self) -> str:
+        return f"Var({self.idx})"
