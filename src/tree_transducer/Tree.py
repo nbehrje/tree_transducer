@@ -22,7 +22,8 @@ class Tree:
         self._validate_input()
 
     def _validate_input(self):
-        """Verifies that the arguments passed to init produce a well-defined tree
+        """
+        Verifies that the arguments passed to init produce a well-defined tree
         
         Raises:
             ValueError: The tree's value has type None but the list of children is not empty.
@@ -31,12 +32,24 @@ class Tree:
             raise ValueError("Tree with children has value type of None.")
 
     def is_leaf(self) -> bool:
-        """Returns whether the tree is a leaf
+        """
+        Returns whether the tree is a leaf
         
         Returns:
             bool: True if the tree is a leaf and False otherwise.
         """
         return not self.children
+
+    def term_yield(self) -> list:
+        """
+        Returns the terminal yield of the tree
+
+        Returns:
+            list: The terminal yield of the tree
+        """
+        if self.children:
+            return sum([c.term_yield() for c in self.children],[])
+        return [self.value]
 
     def __str__(self) -> str:
         return f"{self.value}({','.join(str(c) for c in self.children)})"
