@@ -3,7 +3,7 @@ from src.tree_transducer.TreeTransducer.DBTT import DBTT
 from src.tree_transducer.Tree import Tree, VarLeaf
 
 class DBTTTests(unittest.TestCase):
-    #Raises error if DBTA's final states is not a subset of the DTTA's states
+    #Raises error if DBTT's final states is not a subset of the DBTT's states
     def testFinalStatesNotSubset(self):
         self.assertRaises(ValueError, DBTT, [], ["qA"], [], [], {})
 

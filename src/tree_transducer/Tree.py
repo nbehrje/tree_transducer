@@ -53,8 +53,29 @@ class Tree:
         return [self.value]
 
     def fill(self, trees: tuple) -> Tree:
+        """
+        Fills a tree with a tuple of trees.
+        Each VarLeaf subtree is replaced with the tree from the tuple with the index of the VarLeaf.
+        This modifies the tree.
+
+        Args:
+            trees: A Tuple containing the trees to be added to this tree
+
+        Returns:
+            Tree: self, the new Tree with VarLeaf subtrees replaced
+        """
         self.children = [c.fill(trees) for c in self.children]
         return self
+
+    def get_values(self) -> set:
+        """
+        Returns a set of all the values within the tree
+
+        Returns:
+            set: the set of all the values within the tree
+        """
+        values = {self.value}.union(*[c.get_values() for c in self.children])
+        return values
 
     def __str__(self) -> str:
         return f"{self.value}({','.join(str(c) for c in self.children)})"
@@ -75,9 +96,28 @@ class VarLeaf(Tree):
         self.idx = idx
 
     def fill(self, trees: tuple):
+        """
+        Replaces a VarLeaf with an input tree with the same index as the VarLeaf
+
+        Args:
+            trees: A Tuple containing the tree to replace the VarLeaf
+
+        Returns:
+            Tree: the Tree in the tuple
+        """
         if self.idx > len(trees):
             raise IndexError("VarLeaf index greater than length of filling trees")
         return trees[self.idx]
+
+    def get_values(self) -> set:
+        """
+        Returns a set of all the values within the tree
+        Returns an empty set because VarLeaf is not for storing values except the index
+
+        Returns:
+            set: the empty set
+        """
+        return set()
 
     def __str__(self) -> str:
         return f"Var({self.idx})"

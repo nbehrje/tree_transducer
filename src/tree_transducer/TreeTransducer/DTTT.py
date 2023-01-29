@@ -1,11 +1,11 @@
 """
-Deterministic finite-state bottom-up tree transducer module
+Deterministic finite-state top-down tree transducer module
 """
 from collections.abc import Iterable
 from .TreeTransducer import TreeTransducer
-from src.tree_transducer.Tree import Tree
+from src.tree_transducer.Tree import Tree, VarLeaf
 
-class DBTT(TreeTransducer):
+class DTTT(TreeTransducer):
     """
     Deterministic finite-state bottom-up tree transducer class
     """
@@ -27,7 +27,7 @@ class DBTT(TreeTransducer):
         Verifies that the arguments passed to init produce a well-defined transducer
         
         Raises:
-            ValueError: The DBTT is not properly defined.
+            ValueError: The DTTT is not properly defined.
         """
         #Verify states
         if not self.final_states.issubset(self.states):
@@ -38,16 +38,16 @@ class DBTT(TreeTransducer):
         transitions_in_symbols = set()
         transitions_out_symbols = set()
         for (k, v) in self.transitions.items():
-            transitions_states.update(set(k[0]))
-            transitions_states.add(v[0])
+            transitions_states.add(k[0])
+            transitions_states.update(v[0])
             transitions_in_symbols.add(k[1])
-            transitions_out_symbols.add(v[1].value)
+            transitions_out_symbols.update(v[1].get_values())
         if not transitions_states.issubset(self.states):
-            raise ValueError(f"DBTT's transitions contain state(s) not present in its states: {transitions_states - self.states}")
+            raise ValueError(f"DTTT's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_in_symbols.issubset(self.in_symbols):
-            raise ValueError(f"DBTT's transitions contain input symbol(s) not present in its in_symbols: {transitions_in_symbols - self.in_symbols}")
+            raise ValueError(f"DTTT's transitions contain input symbol(s) not present in its in_symbols: {transitions_in_symbols - self.in_symbols}")
         if not transitions_out_symbols.issubset(self.out_symbols):
-            raise ValueError(f"DBTT's transitions contain output symbol(s) not present in its out_symbols: {transitions_out_symbols - self.out_symbols}")
+            raise ValueError(f"DTTT's transitions contain output symbol(s) not present in its out_symbols: {transitions_out_symbols - self.out_symbols}")
 
     def transduce(self, tree: Tree) -> Tree:
         """
@@ -59,27 +59,26 @@ class DBTT(TreeTransducer):
         Returns:
             Tree: A new Tree made by applying the transduction to the input Tree
         """
-        (out_state, out_tree) = self._transduce_helper(tree)
-        if out_state in self.final_states:
-            return out_tree
-        return None
+        root_state = next(iter(self.final_states))
+        return self._transduce_helper(root_state, tree)
 
-    def _transduce_helper(self, tree: Tree):
+    def _transduce_helper(self, state, in_tree: Tree) -> Tree:
         """
         Recursive helper for transduce()
 
         Args:
+            state: The state of the tree.
             tree: The Tree to be transduced.
 
         Returns:
-            A tuple containing a state and an output tree that has that state
+            Tree: The filled output Tree
         """
-        if tree.is_leaf():
-            child_states, child_trees = tuple(), tuple()
-        else:
-            children = list(zip(*[self._transduce_helper(c) for c in tree.children]))
-            child_states, child_trees = children[0], children[1]
-        parent_state, out_tree = self.transitions.get((child_states, tree.value), (None,None))
-        if parent_state is not None:
-            out_tree = out_tree.fill(child_trees)
-        return (parent_state, out_tree)
+        num_in_children = len(in_tree.children)
+        child_states, out_tree = self.transitions.get((state, in_tree.value, num_in_children), (None, None))
+        if out_tree is None:
+            return None
+        child_trees = [self._transduce_helper(child_states[i], in_tree.children[i]) for i in range(num_in_children)]
+        if None in child_trees:
+            return None
+        out_tree = out_tree.fill(child_trees)
+        return out_tree
