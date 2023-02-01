@@ -9,9 +9,9 @@ class DTTATests(unittest.TestCase):
 
     #Raises error if DTTA's transitions contain states or symbols not present in the DTTA's states or symbols
     def testNewStatesSymbolsInTransitions(self):
-        self.assertRaises(ValueError, DTTA, ["qA"], [], ["A"], {("qB","A", 2):("qA", "qA")})
-        self.assertRaises(ValueError, DTTA, ["qA"], [], ["A"], {("qA","A", 2):("qA", "qB")})
-        self.assertRaises(ValueError, DTTA, ["qA"], [], ["A"], {("qA","B", 2):("qA", "qA")})
+        self.assertRaises(ValueError, DTTA, ["qA"], ["qA"], ["A"], {("qB","A", 2):("qA", "qA")})
+        self.assertRaises(ValueError, DTTA, ["qA"], ["qA"], ["A"], {("qA","A", 2):("qA", "qB")})
+        self.assertRaises(ValueError, DTTA, ["qA"], ["qA"], ["A"], {("qA","B", 2):("qA", "qA")})
 
     #Raises error if DTTA contains transition rule with mismatched number of children
     def testTransitionMismatched(self):

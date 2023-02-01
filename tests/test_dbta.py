@@ -9,8 +9,8 @@ class DBTATests(unittest.TestCase):
 
     #Raises error if DBTA's transitions contain states or symbols not present in the DBTA's states or symbols
     def testNewStatesSymbolsInTransitions(self):
-        self.assertRaises(ValueError, DBTA, ["qA"], [], ["A"], {(("qA",), "A"): "qA",(("qB",), "A"): "qA"})
-        self.assertRaises(ValueError, DBTA, ["qA"], [], ["A"], {(("qA",), "A"): "qA",(("qA",), "B"): "qA"})
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): "qA",(("qB",), "A"): "qA"})
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): "qA",(("qA",), "B"): "qA"})
 
     #Returns True if the tree is accepted
     def testCorrectTreeAccepted(self):

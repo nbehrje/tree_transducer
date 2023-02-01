@@ -22,7 +22,7 @@ class TreeAutomaton:
         self.final_states = set(final_states)
         self.symbols = set(symbols)
         self.transitions = transitions
-            
+        
         self._validate_input()
 
     def _validate_input(self):
