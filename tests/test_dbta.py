@@ -24,6 +24,10 @@ class DBTATests(unittest.TestCase):
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A")])])
         self.assertFalse(automaton.accepts(tree))
 
+    #Raises error if there is an epsilon transition
+    def testEpsilon(self):
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), ""): "qA"})
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(DBTATests)
     runner = unittest.TextTestRunner()

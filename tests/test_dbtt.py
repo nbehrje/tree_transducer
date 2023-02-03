@@ -45,6 +45,10 @@ class DBTTTests(unittest.TestCase):
         in_tree = Tree("S", [Tree("A"), Tree("S", [Tree("C"), Tree("B")]), Tree("B")])
         self.assertEqual(transducer.transduce(in_tree), None)
 
+    #Raises error if there is an epsilon transition
+    def testEpsilon(self):
+        self.assertRaises(ValueError, DBTT, ["qA"],["qA"],["A"],["Z"],{(("qB",),""):("qA",Tree("Z", VarLeaf(0)))})
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(DBTTTests)
     runner = unittest.TextTestRunner()

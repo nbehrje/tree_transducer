@@ -43,6 +43,8 @@ class DBTA(TreeAutomaton):
             transitions_states.update(set(k[0]))
             transitions_states.add(v)
             transitions_symbols.add(k[1])
+        if "" in self.symbols or "" in transitions_symbols:
+            raise ValueError("Deterministic automaton contains an epsilon transition")
         if not transitions_states.issubset(self.states):
             raise ValueError(f"DBTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_symbols.issubset(self.symbols):

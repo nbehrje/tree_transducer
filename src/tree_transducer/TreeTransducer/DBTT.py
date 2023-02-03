@@ -42,6 +42,8 @@ class DBTT(TreeTransducer):
             transitions_states.add(v[0])
             transitions_in_symbols.add(k[1])
             transitions_out_symbols.add(v[1].value)
+        if "" in self.in_symbols or "" in transitions_in_symbols:
+            raise ValueError("Deterministic automaton contains an epsilon transition")
         if not transitions_states.issubset(self.states):
             raise ValueError(f"DBTT's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_in_symbols.issubset(self.in_symbols):

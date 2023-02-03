@@ -35,6 +35,10 @@ class DTTATests(unittest.TestCase):
         tree = Tree("S", [Tree("a"), Tree("S", [Tree("b"), Tree("a")]), Tree("b")])
         self.assertFalse(automaton.accepts(tree))
 
+    #Raises error if there is an epsilon transition
+    def testEpsilon(self):
+        self.assertRaises(ValueError, DTTA, ["qA"], ["qA"], ["A"], {("qA","", 2):("qA", "qA")})
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(DTTATests)
     runner = unittest.TextTestRunner()
