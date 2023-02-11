@@ -35,10 +35,10 @@ class NBTATests(unittest.TestCase):
     def testEpsilonClosure(self):
         automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}, (("qA",),""):{"qB"}})
         closure = {
-            ("qA"): {"qB"},
-            ("qB"): set()
+            ("qA"): {"qA","qB"},
+            ("qB"): {"qB"}
         }
-        self.assertEqual(automaton.getEpsilonClosure(), closure)
+        self.assertEqual(automaton.get_epsilon_closure(), closure)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NBTATests)

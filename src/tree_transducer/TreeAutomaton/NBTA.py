@@ -26,6 +26,7 @@ class NBTA(TreeAutomaton):
             ValueError: The NBTA is not properly defined.
         """
         super().__init__(states, final_states, symbols, transitions)
+        self.epsilon_closure = self.get_epsilon_closure()
 
     def _validate_input(self):
         """
@@ -62,10 +63,8 @@ class NBTA(TreeAutomaton):
             bool: True if the NBTA accepts the tree and False otherwise.
         """
         final_state = self._accept_helper(tree)
-        e_closure = self.getEpsilonClosure()
         for f in list(final_state):
-            final_state.update(e_closure.get(f))
-        print(tree, final_state)
+            final_state.update(self.epsilon_closure.get(f))
         return final_state.intersection(self.final_states) != set()
 
     def _accept_helper(self, tree: Tree) -> set:
@@ -88,11 +87,12 @@ class NBTA(TreeAutomaton):
             return set.union(*states)
         return set()
 
-    def getEpsilonClosure(self) -> dict:
-        e_closure = defaultdict(set)
+    def get_epsilon_closure(self) -> dict:
+        e_closure = dict()
 
         for s in self.states:
             to_states = {v for v in self.transitions.get(((s,), ""), set())}
+            to_states.add(s)
             e_closure[s] = to_states
             
         states = list(self.states)

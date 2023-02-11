@@ -33,9 +33,44 @@ class NTTATests(unittest.TestCase):
                                                                 ("qB","b",0):{tuple()}})
         tree = Tree("S", [Tree("a"), Tree("S", [Tree("a"), Tree("a")]), Tree("b")])
         self.assertTrue(automaton.accepts(tree))
-        automaton = NTTA(["qS","qA","qB"],["qS"],["a","b","S"],{("qS","S", 2):{("qA", "qB"), ("qA", "qA")},
-                                                                ("qS", "S", 3):{("qA", "qS", "qB")},
+        automaton = NTTA(["qS","qA","qB","qT","qR"],["qT"],["a","b","S"],{("qS","S", 2):{("qA", "qB"), ("qA", "qA")},
+                                                                ("qS","S", 3):{("qA", "qS", "qB")},
                                                                 ("qA","a",0): {tuple()},
-                                                                ("qB","b",0):{tuple()}})
+                                                                ("qB","b",0):{tuple()},
+                                                                ("qT","",1):{("qR",)},
+                                                                ("qR","",1):{("qS",)}})
         tree = Tree("S", [Tree("a"), Tree("S", [Tree("a"), Tree("a")]), Tree("b")])
         self.assertTrue(automaton.accepts(tree))
+
+    #Returns False if the tree is rejected
+    def testIncorrectTreeRejected(self):
+        automaton = NTTA(["qS","qA","qB","qT","qR"],["qT"],["a","b","S"],{("qS","S", 2):{("qA", "qB"), ("qA", "qA")},
+                                                                ("qS","S", 3):{("qA", "qS", "qB")},
+                                                                ("qA","a",0): {tuple()},
+                                                                ("qB","b",0):{tuple()},
+                                                                ("qT","",1):{("qR",)}})
+        tree = Tree("S", [Tree("a"), Tree("S", [Tree("a"), Tree("a")]), Tree("b")])
+        self.assertFalse(automaton.accepts(tree))
+
+    #Returns epsilon closure
+    def testEpsilonClosure(self):
+        automaton = NTTA(["qS","qA","qB","qT","qR"],["qT"],["a","b","S"],{("qS","S", 2):{("qA", "qB"), ("qA", "qA")},
+                                                                ("qS","S", 3):{("qA", "qS", "qB")},
+                                                                ("qA","a",0): {tuple()},
+                                                                ("qB","b",0):{tuple()},
+                                                                ("qT","",1):{("qR",)},
+                                                                ("qR","",1):{("qS",)}})
+        closure = {
+            ("qA"): {"qA"},
+            ("qB"): {"qB"},
+            ("qS"): {"qS"},
+            ("qT"): {"qT","qR","qS"},
+            ("qR"): {"qR","qS"}
+        }
+        self.assertEqual(automaton.get_epsilon_closure(), closure)
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(NTTATests)
+    runner = unittest.TextTestRunner()
+    result = runner.run(suite)
+    print(result)
