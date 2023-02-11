@@ -18,10 +18,10 @@ class NBTATests(unittest.TestCase):
         automaton = NBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A"), Tree("A")])])
         self.assertTrue(automaton.accepts(tree))
-        automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}, (("qA","qA"),""):{"qB"}})
+        automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA", "qB"}, (tuple(),"A"):{"qA"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A"), Tree("A")])])
         self.assertTrue(automaton.accepts(tree))
-        automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA", "qB"}, (tuple(),"A"):{"qA"}})
+        automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}, (("qA",),""):{"qB"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A"), Tree("A")])])
         self.assertTrue(automaton.accepts(tree))
 
@@ -30,6 +30,15 @@ class NBTATests(unittest.TestCase):
         automaton = NBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A")])])
         self.assertFalse(automaton.accepts(tree))
+
+    #Returns epsilon closure
+    def testEpsilonClosure(self):
+        automaton = NBTA(["qA","qB"],["qB"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}, (("qA",),""):{"qB"}})
+        closure = {
+            ("qA"): {"qB"},
+            ("qB"): set()
+        }
+        self.assertEqual(automaton.getEpsilonClosure(), closure)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NBTATests)

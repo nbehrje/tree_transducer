@@ -5,6 +5,7 @@ from collections.abc import Iterable
 from ..Tree import Tree
 from .TreeAutomaton import TreeAutomaton
 from itertools import product
+from collections import defaultdict
 
 class NBTA(TreeAutomaton):
     """
@@ -22,7 +23,7 @@ class NBTA(TreeAutomaton):
             transitions: A dict containing the transitions (Delta)
 
         Raises:
-            ValueError: The DBTA is not properly defined.
+            ValueError: The NBTA is not properly defined.
         """
         super().__init__(states, final_states, symbols, transitions)
 
@@ -58,12 +59,16 @@ class NBTA(TreeAutomaton):
             tree: The candidate Tree.
 
         Returns:
-            bool: True if the DBTA accepts the tree and False otherwise.
+            bool: True if the NBTA accepts the tree and False otherwise.
         """
         final_state = self._accept_helper(tree)
+        e_closure = self.getEpsilonClosure()
+        for f in list(final_state):
+            final_state.update(e_closure.get(f))
+        print(tree, final_state)
         return final_state.intersection(self.final_states) != set()
 
-    def _accept_helper(self, tree: Tree):
+    def _accept_helper(self, tree: Tree) -> set:
         """
         Recursive helper for accept()
 
@@ -71,13 +76,38 @@ class NBTA(TreeAutomaton):
             tree: The candidate Tree.
 
         Returns:
-            The state of the input Tree when processed by the automaton
+            The set of possible states of the input Tree when processed by the automaton
         """
         child_states = tuple(self._accept_helper(c) for c in tree.children)
         child_possibilities = set(product(*child_states))
-        states_epsilon = [self.transitions.get((children, ""), set()) for children in child_possibilities]
-        states_read = [self.transitions.get((children, tree.value), set()) for children in child_possibilities]
-        states = states_epsilon + states_read
+        states_read = [self.transitions.get((children, tree.value), set()) for children in child_possibilities] \
+            + [self.transitions.get((children, ""), set()) for children in child_possibilities]
+        states = states_read
+        
         if states:
             return set.union(*states)
         return set()
+
+    def getEpsilonClosure(self) -> dict:
+        e_closure = defaultdict(set)
+
+        for s in self.states:
+            to_states = {v for v in self.transitions.get(((s,), ""), set())}
+            e_closure[s] = to_states
+            
+        states = list(self.states)
+        update = False
+        i = 0
+        l = len(states)
+        while i < l:
+            state = states[i]
+            cur_closure = e_closure[state]
+            for s in cur_closure:
+                if not e_closure[s].issubset(cur_closure):
+                    update = True
+                    e_closure[state] = e_closure[state].union(e_closure[s])
+            i += 1
+            if i == l and update:
+                i = 0
+                update = False
+        return e_closure
