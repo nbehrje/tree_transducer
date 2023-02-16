@@ -83,6 +83,12 @@ class NTTA(TreeAutomaton):
         return vals and any([all(self._accept_helper(val[c],tree.children[c]) for c in range(len(tree.children)))] for val in vals)
 
     def get_epsilon_closure(self) -> dict:
+        """
+        Finds the epsilon closure for each states in the automaton
+
+        Returns:
+            dict: A dictionary with states as keys and sets of states as the values
+        """
         e_closure = {s:set([s]) for s in self.states}
 
         for (k,v) in self.transitions.items():

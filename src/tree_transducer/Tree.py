@@ -54,18 +54,16 @@ class Tree:
 
     def fill(self, trees: tuple) -> Tree:
         """
-        Fills a tree with a tuple of trees.
-        Each VarLeaf subtree is replaced with the tree from the tuple with the index of the VarLeaf.
-        This modifies the tree.
+        Returns a tree filled by tuple of trees.
+        Each VarLeaf subtree in the new tree is replaced with the tree from the tuple with the index of the VarLeaf.
 
         Args:
-            trees: A Tuple containing the trees to be added to this tree
+            trees: A Tuple containing the trees to be added to the tree
 
         Returns:
-            Tree: self, the new Tree with VarLeaf subtrees replaced
+            Tree: The new Tree with VarLeaf subtrees replaced
         """
-        self.children = [c.fill(trees) for c in self.children]
-        return self
+        return Tree(self.value, [c.fill(trees) for c in self.children])
 
     def get_values(self) -> set:
         """
@@ -90,6 +88,9 @@ class Tree:
         if isinstance(other, Tree):
             return self.value == other.value and self.children == other.children
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.__str__())
 
 class VarLeaf(Tree):
     def __init__(self, idx):

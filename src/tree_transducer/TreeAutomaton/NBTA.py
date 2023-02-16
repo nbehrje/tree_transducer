@@ -88,6 +88,12 @@ class NBTA(TreeAutomaton):
         return set()
 
     def get_epsilon_closure(self) -> dict:
+        """
+        Finds the epsilon closure for each states in the automaton
+
+        Returns:
+            dict: A dictionary with states as keys and sets of states as the values
+        """
         e_closure = dict()
 
         for s in self.states:
