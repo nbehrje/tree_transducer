@@ -14,7 +14,7 @@ class NBTA(TreeAutomaton):
 
     def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, transitions: dict):
         """
-        Creates a non-deterministic finite-state bottom-up tree automaton
+        Creates a bottom-up tree automaton
         
         Args:
             states: An Iterable containing the set of states (Q)

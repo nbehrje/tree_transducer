@@ -9,24 +9,28 @@ class DBTATests(unittest.TestCase):
 
     #Raises error if DBTA's transitions contain states or symbols not present in the DBTA's states or symbols
     def testNewStatesSymbolsInTransitions(self):
-        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): "qA",(("qB",), "A"): "qA"})
-        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): "qA",(("qA",), "B"): "qA"})
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): {"qA"},(("qB",), "A"): {"qA"}})
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), "A"): {"qA"},(("qA",), "B"): {"qA"}})
 
     #Returns True if the tree is accepted
     def testCorrectTreeAccepted(self):
-        automaton = DBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):"qA", (tuple(),"A"):"qA"})
+        automaton = DBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A"), Tree("A")])])
         self.assertTrue(automaton.accepts(tree))
 
     #Returns False if the tree is rejected
     def testIncorrectTreeRejected(self):
-        automaton = DBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):"qA", (tuple(),"A"):"qA"})
+        automaton = DBTA(["qA"],["qA"],["A"],{(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
         tree = Tree("A", [Tree("A"), Tree("A", [Tree("A")])])
         self.assertFalse(automaton.accepts(tree))
 
     #Raises error if there is an epsilon transition
     def testEpsilon(self):
-        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), ""): "qA"})
+        self.assertRaises(ValueError, DBTA, ["qA"], ["qA"], ["A"], {(("qA",), ""): {"qA"}})
+
+    #Raises error if there are multiple transitions for a set of states and a symbol
+    def testNondeterministic(self):
+        self.assertRaises(ValueError, DBTA, ["qA", "qB"], ["qA"], ["A"], {(("qA",), ""): {"qA", "qB"}})
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(DBTATests)

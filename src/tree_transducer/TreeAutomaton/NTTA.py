@@ -13,7 +13,7 @@ class NTTA(TreeAutomaton):
     """
     def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, transitions: dict):
         """
-        Creates a non-deterministic finite-state top-down tree automaton
+        Creates a top-down tree automaton
         
         Args:
             states: An Iterable containing the set of states (Q)

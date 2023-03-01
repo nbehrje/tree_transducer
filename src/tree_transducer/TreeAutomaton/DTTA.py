@@ -3,26 +3,12 @@ Deterministic Top-down Tree Automaton Module
 """
 from collections.abc import Iterable
 from ..Tree import Tree
-from .TreeAutomaton import TreeAutomaton
+from .NTTA import NTTA
 
-class DTTA(TreeAutomaton):
+class DTTA(NTTA):
     """
     Deterministic top-down finite-state tree automaton
     """
-    def __init__(self, states: Iterable, final_states: Iterable, symbols: Iterable, transitions: dict):
-        """
-        Creates a deterministic finite-state top-down tree automaton
-        
-        Args:
-            states: An Iterable containing the set of states (Q)
-            final_states: An Iterable containing the set of final states (Q_i)
-            symbols: An Iterable containing the set of symbols (F)
-            transitions: A dict containing the transitions (Delta)
-
-        Raises:
-            ValueError: The DTTA is not properly defined.
-        """
-        super().__init__(states, final_states, symbols, transitions)
 
     def _validate_input(self):
         """
@@ -31,27 +17,12 @@ class DTTA(TreeAutomaton):
         Raises:
             ValueError: The DTTA is not properly defined.
         """
-        #Verify states
-        if len(self.final_states) > 1:
-            raise ValueError("final_states contains more than one state.")
-        if not self.final_states.issubset(self.states):
-            raise ValueError("final_states must be a subset of states.")
-
-        #Verify transitions
-        transitions_states = set()
-        transitions_symbols = set()
+        super()._validate_input()
         for (k, v) in self.transitions.items():
-            if not k[2] == len(v):
-                raise ValueError(f"DTTA's transition contains mismatched number of children: {k,v}")
-            transitions_states.update(set(v))
-            transitions_states.add(k[0])
-            transitions_symbols.add(k[1])
-        if "" in self.symbols or "" in transitions_symbols:
-            raise ValueError("Deterministic automaton contains an epsilon transition")
-        if not transitions_states.issubset(self.states):
-            raise ValueError(f"DTTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
-        if not transitions_symbols.issubset(self.symbols):
-            raise ValueError(f"DTTA's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
+            if len(v) > 1:
+                raise ValueError("Deterministic automaton contains multiple transitions for an input")
+            if not k[1]:
+                raise ValueError("Deterministic automaton contains epsilon transition")
             
 
     def accepts(self, tree: Tree) -> bool:
@@ -80,4 +51,4 @@ class DTTA(TreeAutomaton):
         """
         key = (state, tree.value, len(tree.children))
         val = self.transitions.get(key, None)
-        return val is not None and all(self._accept_helper(val[c],tree.children[c]) for c in range(len(tree.children)))
+        return val is not None and all(self._accept_helper(next(iter(val))[c],tree.children[c]) for c in range(len(tree.children)))
