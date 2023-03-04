@@ -11,7 +11,7 @@ class DBTA(NBTA):
         Verifies that the arguments passed to init produce a well-defined automaton
         
         Raises:
-            ValueError: The DBTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         super()._validate_input()
         for (k, v) in self.transitions.items():

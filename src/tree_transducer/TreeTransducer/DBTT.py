@@ -15,7 +15,7 @@ class DBTT(NBTT):
         Verifies that the arguments passed to init produce a well-defined transducer
         
         Raises:
-            ValueError: The DBTT is not properly defined.
+            ValueError: The transducer is not properly defined.
         """
         super()._validate_input()
         for (k, v) in self.transitions.items():

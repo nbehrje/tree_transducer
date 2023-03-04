@@ -1,11 +1,13 @@
 """
 Non-deterministic Bottom-up Tree Automaton Module
 """
+from __future__ import annotations
 from collections.abc import Iterable
 from ..Tree import Tree
 from .TreeAutomaton import TreeAutomaton
-from itertools import product
+from itertools import product, chain
 from collections import defaultdict
+import copy
 
 class NBTA(TreeAutomaton):
     """
@@ -23,7 +25,7 @@ class NBTA(TreeAutomaton):
             transitions: A dict containing the transitions (Delta)
 
         Raises:
-            ValueError: The NBTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         super().__init__(states, final_states, symbols, transitions)
         self.epsilon_closure = self.get_epsilon_closure()
@@ -33,7 +35,7 @@ class NBTA(TreeAutomaton):
         Verifies that the arguments passed to init produce a well-defined automaton
         
         Raises:
-            ValueError: The NBTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         #Verify states
         if not self.final_states.issubset(self.states):
@@ -48,9 +50,9 @@ class NBTA(TreeAutomaton):
             if k[1]:
                 transitions_symbols.add(k[1])
         if not transitions_states.issubset(self.states):
-            raise ValueError(f"NBTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
+            raise ValueError(f"Automaton's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_symbols.issubset(self.symbols):
-            raise ValueError(f"NBTA's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
+            raise ValueError(f"Automaton's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
 
     def accepts(self, tree: Tree) -> bool:
         """
@@ -60,7 +62,7 @@ class NBTA(TreeAutomaton):
             tree: The candidate Tree.
 
         Returns:
-            bool: True if the NBTA accepts the tree and False otherwise.
+            bool: True if the automaton accepts the tree and False otherwise.
         """
         final_state = self._accept_helper(tree)
         for f in list(final_state):
@@ -117,3 +119,79 @@ class NBTA(TreeAutomaton):
                 i = 0
                 update = False
         return e_closure
+
+    def union(self, other: NBTA) -> NBTA:
+        """
+        Returns the union of this bottom-up automaton and another top-down automaton.
+        The states and transitions are the products of the input automata.
+        An NBTA is always returned even if both input automata are deterministic.
+
+        Returns:
+            NBTA: the union of this bottom-up automaton and another top-down automaton
+        """
+        new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
+        new_transitions = dict()
+        new_final_states = {f"{s1}_{s2}" for s1 in self.final_states for s2 in other.states}
+        new_final_states.update({f"{s1}_{s2}" for s1 in self.states for s2 in other.final_states})
+        ranks = dict()
+        self_ranks = dict()
+        other_ranks = dict()
+        completed_transitions_self = copy.deepcopy(self.transitions)
+        completed_transitions_other = copy.deepcopy(other.transitions)
+        new_states = {f"{s1}_{s2}" for s1 in self.states for s2 in other.states}
+        for k in self.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            self_r = self_ranks.get(k[1], set()).copy()
+            self_r.add(len(k[0]))
+            self_ranks[k[1]] = self_r
+        for k in other.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            other_r = other_ranks.get(k[1], set()).copy()
+            other_r.add(len(k[0]))
+            other_ranks[k[1]] = other_r
+        for symbol in ranks:
+            self_diff = ranks[symbol] - self_ranks.get(symbol, set())
+            for r in self_diff:
+                completed_transitions_self[(tuple(["%S%"] * r), symbol)] = {"%S%"}
+            other_diff = ranks[symbol] - other_ranks.get(symbol, set())
+            for r in other_diff:
+                completed_transitions_other[(tuple(["%S%"] * r), symbol)] = {"%S%"}
+        for k_s, v_s in completed_transitions_self.items():
+            for k_o, v_o in completed_transitions_other.items():
+                if not k_s[1] == k_o[1]:
+                    continue
+                if not len(k_s[0]) == len(k_o[0]):
+                    continue
+                new_children = tuple([f"{k_s[0][i]}_{k_o[0][i]}" for i in range(len(k_s[0]))])
+                new_val = set()
+                new_states.update(new_children)
+                for s1 in v_s:
+                    for s2 in v_o:
+                        s = f"{s1}_{s2}"
+                        new_val.add(s)
+                        if s1 in self.final_states or s2 in other.final_states:
+                            new_final_states.add(s)
+                new_states.update(new_val)
+                new_transitions[(new_children, k_s[1])] = new_val
+        return NBTA(new_states, new_final_states, new_symbols, new_transitions)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, NBTA):
+            return self.states == other.states and \
+                    self.final_states == other.states and \
+                    self.transitions == other.transitions
+        return False
+
+    def __str__(self) -> str:
+        return f"NBTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"NBTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"

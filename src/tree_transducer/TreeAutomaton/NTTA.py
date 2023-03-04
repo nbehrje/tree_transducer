@@ -22,7 +22,7 @@ class NTTA(TreeAutomaton):
             transitions: A dict containing the transitions (Delta)
 
         Raises:
-            ValueError: The NTTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         super().__init__(states, final_states, symbols, transitions)
         self.epsilon_closure = self.get_epsilon_closure()
@@ -32,7 +32,7 @@ class NTTA(TreeAutomaton):
         Verifies that the arguments passed to init produce a well-defined automaton
         
         Raises:
-            ValueError: The NTTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         #Verify states
         if not self.final_states.issubset(self.states):
@@ -44,15 +44,15 @@ class NTTA(TreeAutomaton):
         for (k, v) in self.transitions.items():
             for v_i in v:
                 if not k[2] == len(v_i):
-                    raise ValueError(f"NTTA's transition contains mismatched number of children: {k,v_i}")
+                    raise ValueError(f"Automaton's transition contains mismatched number of children: {k,v_i}")
                 transitions_states.update(set(v_i))
             transitions_states.add(k[0])
             if k[1]:
                 transitions_symbols.add(k[1])
         if not transitions_states.issubset(self.states):
-            raise ValueError(f"NTTA's transitions contain state(s) not present in its states: {transitions_states - self.states}")
+            raise ValueError(f"Automaton's transitions contain state(s) not present in its states: {transitions_states - self.states}")
         if not transitions_symbols.issubset(self.symbols):
-            raise ValueError(f"NTTA's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
+            raise ValueError(f"Automaton's transitions contain symbol(s) not present in its symbols: {transitions_symbols - self.symbols}")
 
     def accepts(self, tree: Tree) -> bool:
         """
@@ -62,7 +62,7 @@ class NTTA(TreeAutomaton):
             tree: The candidate Tree.
 
         Returns:
-            bool: True if the NTTA accepts the tree and False otherwise.
+            bool: True if the automaton accepts the tree and False otherwise.
         """
         states = set.union(*[self.epsilon_closure[s] for s in self.final_states])
         return self._accept_helper(states, tree)

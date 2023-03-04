@@ -40,6 +40,19 @@ class NBTATests(unittest.TestCase):
         }
         self.assertEqual(automaton.get_epsilon_closure(), closure)
 
+    #Returns union
+    def testUnion(self):
+        automaton1 = NBTA(["qA"],["qA"],["A"], {(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
+        automaton2 = NBTA(["qB"],["qB"],["B"], {(("qB",),"B"):{"qB"}, (tuple(),"B"):{"qB"}})
+        union = NBTA(["qA_qB", "qA_%S%", "%S%_qB"],
+                    ["qA_qB", "qA_%S%", "%S%_qB"],
+                    ["A", "B"],
+                    {(("qA_%S%","qA_%S%"),"A"):{"qA_%S%"},
+                        (tuple(),"A"):{"qA_%S%"},
+                        (("%S%_qB",),"B"):{"%S%_qB"},
+                        (tuple(),"B"):{"%S%_qB"}})
+        self.assertEqual(automaton1.union(automaton2), union)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NBTATests)
     runner = unittest.TextTestRunner()

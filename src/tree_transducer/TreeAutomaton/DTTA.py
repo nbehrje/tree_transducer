@@ -15,7 +15,7 @@ class DTTA(NTTA):
         Verifies that the arguments passed to init produce a well-defined automaton
         
         Raises:
-            ValueError: The DTTA is not properly defined.
+            ValueError: The automaton is not properly defined.
         """
         super()._validate_input()
         for (k, v) in self.transitions.items():
@@ -33,7 +33,7 @@ class DTTA(NTTA):
             tree: The candidate Tree.
 
         Returns:
-            bool: True if the DTTA accepts the tree and False otherwise.
+            bool: True if the automaton accepts the tree and False otherwise.
         """
         state = next(iter(self.final_states))
         return self._accept_helper(state, tree)

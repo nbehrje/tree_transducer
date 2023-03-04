@@ -29,7 +29,7 @@ class NBTT(TreeTransducer):
         Verifies that the arguments passed to init produce a well-defined transducer
         
         Raises:
-            ValueError: The DBTT is not properly defined.
+            ValueError: The transducer is not properly defined.
         """
         #Verify states
         if not self.final_states.issubset(self.states):
@@ -47,11 +47,11 @@ class NBTT(TreeTransducer):
                 transitions_states.add(t[0])
                 transitions_out_symbols.update(t[1].get_values())
         if not transitions_states.issubset(self.states):
-            raise ValueError(f"DBTT's transitions contain state(s) not present in its states: {transitions_states - self.states}")
+            raise ValueError(f"Transducer's transitions contain state(s) not present in its input states: {transitions_states - self.states}")
         if not transitions_in_symbols.issubset(self.in_symbols):
-            raise ValueError(f"DBTT's transitions contain input symbol(s) not present in its in_symbols: {transitions_in_symbols - self.in_symbols}")
+            raise ValueError(f"Transducer's transitions contain input symbol(s) not present in its input in_symbols: {transitions_in_symbols - self.in_symbols}")
         if not transitions_out_symbols.issubset(self.out_symbols):
-            raise ValueError(f"DBTT's transitions contain output symbol(s) not present in its out_symbols: {transitions_out_symbols - self.out_symbols}")
+            raise ValueError(f"Transducer's transitions contain output symbol(s) not present in its input out_symbols: {transitions_out_symbols - self.out_symbols}")
 
     def transduce(self, tree: Tree) -> Tree:
         """
