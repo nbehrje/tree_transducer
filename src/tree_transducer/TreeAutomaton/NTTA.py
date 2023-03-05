@@ -1,11 +1,13 @@
 """
 Non-deterministic Top-down Tree Automaton Module
 """
+from __future__ import annotations
 from collections.abc import Iterable
 from ..Tree import Tree
 from .TreeAutomaton import TreeAutomaton
-from itertools import product
+from itertools import product, chain
 from collections import defaultdict
+import copy
 
 class NTTA(TreeAutomaton):
     """
@@ -112,3 +114,38 @@ class NTTA(TreeAutomaton):
                 i = 0
                 update = False
         return e_closure
+
+    def union(self, other: NTTA) -> NTTA:
+        """
+        Returns the union of this top-down automaton and another top-down automaton.
+        The states and transitions are the products of the input automata.
+        An NTTA is always returned even if both input automata are deterministic.
+
+        Returns:
+            NTTA: the union of this top-down automaton and another top-down automaton
+        """
+        new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
+        new_transitions = dict()
+        new_final_states = {f"1_{s1}" for s1 in self.final_states}
+        new_final_states.update({f"2_{s2}" for s2 in other.final_states})
+        new_states = [f"1_{s1}" for s1 in self.states] + [f"2_{s2}" for s2 in other.states]
+        new_transitions = {(f"1_{k[0]}",k[1],k[2]):{tuple(f"1_{s}" for s in vi) for vi in v} for k,v in self.transitions.items()} | \
+            {(f"2_{k[0]}",k[1],k[2]):{tuple(f"2_{s}" for s in vi) for vi in v} for k,v in other.transitions.items()}
+        return NTTA(new_states, new_final_states, new_symbols, new_transitions)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, NTTA):
+            return self.states == other.states and \
+                    self.final_states == other.states and \
+                    self.transitions == other.transitions
+        return False
+
+    def __str__(self) -> str:
+        return f"NTTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"NTTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"

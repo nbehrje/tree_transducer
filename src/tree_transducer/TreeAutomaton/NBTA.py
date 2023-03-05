@@ -122,12 +122,12 @@ class NBTA(TreeAutomaton):
 
     def union(self, other: NBTA) -> NBTA:
         """
-        Returns the union of this bottom-up automaton and another top-down automaton.
+        Returns the union of this bottom-up automaton and another bottom-up automaton.
         The states and transitions are the products of the input automata.
         An NBTA is always returned even if both input automata are deterministic.
 
         Returns:
-            NBTA: the union of this bottom-up automaton and another top-down automaton
+            NBTA: the union of this bottom-up automaton and another bottom-up automaton
         """
         new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
         new_transitions = dict()

@@ -69,6 +69,16 @@ class NTTATests(unittest.TestCase):
         }
         self.assertEqual(automaton.get_epsilon_closure(), closure)
 
+    #Returns union
+    def testUnion(self):
+        automaton1 = NTTA(["qA"],["qA"],["A"], {("qA","A",2):{("qA","qA")}, ("qA","A",0):{tuple()}})
+        automaton2 = NTTA(["qB"],["qB"],["B"], {("qB","B",1):{("qB",)}, ("qB","B",0):{tuple()}})
+        union = NTTA(["1_qA","2_qB"], ["1_qA","2_qB"], ["A","B"], {('1_qA', 'A', 2): {('1_qA', '1_qA')}, 
+            ('1_qA', 'A', 0): {()},
+            ('2_qB', 'B', 1):{('2_qB',)},
+            ('2_qB', 'B', 0): {()}}) 
+        self.assertEqual(automaton1.union(automaton2), union)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NTTATests)
     runner = unittest.TextTestRunner()
