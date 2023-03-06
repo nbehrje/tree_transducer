@@ -50,6 +50,13 @@ class NTTTTests(unittest.TestCase):
                     Tree("R", [Tree("S", [Tree("A"), Tree("S", [Tree("A"), Tree("B")]), Tree("B")])])}
         self.assertEqual(transducer.transduce(in_tree), out_tree)
 
+    #Returns union
+    def testUnion(self):
+        transducer1 = NTTT(["qA"],["qA"],["A"],["A"], {("qA","A",2):{(("qA","qA"),Tree("A", [VarLeaf(1),VarLeaf(0)]))}, ("qA","A",0):{(tuple(),Tree("A"))}})
+        transducer2 = NTTT(["qB"],["qB"],["B"],["B"], {("qB","B",1):{(("qB",),Tree("B"))}, ("qB","B",0):{(tuple(),Tree("B"))}})
+        union = transducer1.union(transducer2)
+        self.assertEqual(transducer1.union(transducer2), union)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NTTTTests)
     runner = unittest.TextTestRunner()

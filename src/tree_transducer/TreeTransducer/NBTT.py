@@ -1,10 +1,12 @@
 """
 Nondeterministic finite-state bottom-up tree transducer module
 """
+from __future__ import annotations
 from collections.abc import Iterable
 from .TreeTransducer import TreeTransducer
-from src.tree_transducer.Tree import Tree
-from itertools import product
+from src.tree_transducer.Tree import Tree, VarLeaf
+from itertools import product, chain
+import copy
 
 class NBTT(TreeTransducer):
     """
@@ -146,3 +148,83 @@ class NBTT(TreeTransducer):
                 stack_tree += [out_tree] * len(next_outs)
             i += 1
         return outs
+
+    def union(self, other: NBTT) -> NBTT:
+        """
+        Returns the union of this bottom-up automaton and another bottom-up automaton.
+        The states and transitions are the products of the input automata.
+        An NBTA is always returned even if both input automata are deterministic.
+
+        Returns:
+            NBTA: the union of this bottom-up automaton and another bottom-up automaton
+        """
+        new_in_symbols = set(chain.from_iterable([self.in_symbols, other.in_symbols]))
+        new_out_symbols = set(chain.from_iterable([self.out_symbols, other.out_symbols]))
+        new_transitions = dict()
+        new_final_states = {f"{s1}_{s2}" for s1 in self.final_states for s2 in other.states}
+        new_final_states.update({f"{s1}_{s2}" for s1 in self.states for s2 in other.final_states})
+        ranks = dict()
+        self_ranks = dict()
+        other_ranks = dict()
+        completed_transitions_self = copy.deepcopy(self.transitions)
+        completed_transitions_other = copy.deepcopy(other.transitions)
+        new_states = {f"{s1}_{s2}" for s1 in self.states for s2 in other.states}
+        for k in self.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            self_r = self_ranks.get(k[1], set()).copy()
+            self_r.add(len(k[0]))
+            self_ranks[k[1]] = self_r
+        for k in other.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            other_r = other_ranks.get(k[1], set()).copy()
+            other_r.add(len(k[0]))
+            other_ranks[k[1]] = other_r
+        for symbol in ranks:
+            self_diff = ranks[symbol] - self_ranks.get(symbol, set())
+            for r in self_diff:
+                completed_transitions_self[(tuple(["%S%"] * r), symbol)] = {("%S%", VarLeaf(0))}
+            other_diff = ranks[symbol] - other_ranks.get(symbol, set())
+            for r in other_diff:
+                completed_transitions_other[(tuple(["%S%"] * r), symbol)] = {("%S%", VarLeaf(0))}
+        for k_s, v_s in completed_transitions_self.items():
+            for k_o, v_o in completed_transitions_other.items():
+                if not k_s[1] == k_o[1]:
+                    continue
+                if not len(k_s[0]) == len(k_o[0]):
+                    continue
+                new_children = tuple([f"{k_s[0][i]}_{k_o[0][i]}" for i in range(len(k_s[0]))])
+                new_val = []
+                new_states.update(new_children)
+                for s1 in v_s:
+                    for s2 in v_o:
+                        s = f"{s1[0]}_{s2[0]}"
+                        if s1[0] != "%S%":
+                            new_val.append((s, s1[1]))
+                        if s2[0] != "%S%":
+                            new_val.append((s, s2[1]))
+                        new_states.add(s)
+                        if s1[0] in self.final_states or s2[0] in other.final_states:
+                            new_final_states.add(s)
+                new_transitions[(new_children, k_s[1])] = new_val
+        return NBTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, NBTT):
+            return self.states == other.states and \
+                    self.final_states == other.final_states and \
+                    self.transitions == other.transitions
+        return False
+
+    def __str__(self) -> str:
+        return f"NBTT(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"NBTT(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"

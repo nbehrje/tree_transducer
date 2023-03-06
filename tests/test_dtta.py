@@ -24,7 +24,7 @@ class DTTATests(unittest.TestCase):
                                                                 ("qA","a",0): {tuple()},
                                                                 ("qB","b",0):{tuple()}})
         tree = Tree("S", [Tree("a"), Tree("S", [Tree("a"), Tree("b")]), Tree("b")])
-        #self.assertTrue(automaton.accepts(tree))
+        self.assertTrue(automaton.accepts(tree))
 
     #Returns False if the tree is rejected
     def testIncorrectTreeRejected(self):

@@ -1,10 +1,12 @@
 """
 Non-deterministic finite-state top-down tree transducer module
 """
+from __future__ import annotations
 from collections.abc import Iterable
 from .TreeTransducer import TreeTransducer
 from src.tree_transducer.Tree import Tree, VarLeaf
-from itertools import product
+from itertools import product, chain
+import copy
 
 class NTTT(TreeTransducer):
     """
@@ -127,3 +129,39 @@ class NTTT(TreeTransducer):
                 i = 0
                 update = False
         return e_closure
+
+    def union(self, other: NTTT) -> NTTT:
+        """
+        Returns the union of this top-down transducer and another top-down transducer.
+        The states and transitions are the products of the input transducer.
+        An NTTT is always returned even if both input transducers are deterministic.
+
+        Returns:
+            NTTT: the union of this top-down transducer and another top-down transducer
+        """
+        new_in_symbols = set(chain.from_iterable([self.in_symbols, other.in_symbols]))
+        new_out_symbols = set(chain.from_iterable([self.out_symbols, other.out_symbols]))
+        new_transitions = dict()
+        new_final_states = {f"1_{s1}" for s1 in self.final_states}
+        new_final_states.update({f"2_{s2}" for s2 in other.final_states})
+        new_states = [f"1_{s1}" for s1 in self.states] + [f"2_{s2}" for s2 in other.states]
+        new_transitions = {(f"1_{k[0]}",k[1],k[2]):{(tuple(f"1_{s}" for s in vi[0]),vi[1]) for vi in v} for k,v in self.transitions.items()} | \
+            {(f"2_{k[0]}",k[1],k[2]):{(tuple(f"2_{s}" for s in vi[0]),vi[1]) for vi in v} for k,v in other.transitions.items()}
+        return NTTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, NTTT):
+            return self.states == other.states and \
+                    self.final_states == other.final_states and \
+                    self.transitions == other.transitions
+        return False
+
+    def __str__(self) -> str:
+        return f"NTTT(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"NTTT(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"

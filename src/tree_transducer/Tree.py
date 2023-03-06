@@ -120,8 +120,16 @@ class VarLeaf(Tree):
         """
         return set()
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, VarLeaf):
+            return self.idx == other.idx
+        return False
+
     def __str__(self) -> str:
         return f"Var({self.idx})"
 
     def __repr__(self) -> str:
         return f"Var({self.idx})"
+
+    def __hash__(self) -> int:
+        return hash(self.__str__())

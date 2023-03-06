@@ -182,7 +182,7 @@ class NBTA(TreeAutomaton):
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NBTA):
             return self.states == other.states and \
-                    self.final_states == other.states and \
+                    self.final_states == other.final_states and \
                     self.transitions == other.transitions
         return False
 

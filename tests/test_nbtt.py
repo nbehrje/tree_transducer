@@ -61,3 +61,26 @@ class NBTTTests(unittest.TestCase):
             "qT": {"qT"}
         }
         self.assertEqual(transducer.get_epsilon_closure(), closure)
+
+    #Returns union
+    def testUnion(self):
+        transducer1 = NBTT(["qS","qA","qB"],["qS"],["a","b","S"],["a","b","S"], {(("qA","qB"),"S"):[("qS",Tree("S", [VarLeaf(0),VarLeaf(1)]))], (tuple(),"a"):[("qA",Tree("a"))], (tuple(),"b"):[("qB",Tree("b"))]})
+        transducer2 = NBTT(["qC"],["qC"],["C"],["C","D"], {(("qC",),"C"):[("qC",Tree("C",[VarLeaf(0)])),("qC",Tree("D",[VarLeaf(0)]))], (tuple(),"C"):[("qC",Tree("C"))]})
+        union = NBTT({"qA_%S%", "qS_qC", "qA_qC", "qB_%S%", "qS_%S%", "qB_qC", "%S%_qC"},
+                    {"qS_qC", "qA_qC", "qS_%S%", "qB_qC", "%S%_qC"}, 
+                    ["a","b","S","C"],
+                    ["a","b","S","C","D"],
+                    {(("qA_%S%", "qB_%S%"), "S"): [("qS_%S%", Tree("S", [VarLeaf(0),VarLeaf(1)]))],
+                        (tuple(), "a"): [("qA_%S%", Tree("a"))],
+                        (tuple(), "b"): [("qB_%S%", Tree("b"))],
+                        (tuple(), "C"): [("%S%_qC", Tree("C"))],
+                        (("%S%_qC",), "C"): [("%S%_qC", Tree("C", [VarLeaf(0)])),("%S%_qC", Tree("D", [VarLeaf(0)]))]}
+        )
+        self.assertEqual(transducer1.union(transducer2), union)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(NBTTTests)
+    runner = unittest.TextTestRunner()
+    result = runner.run(suite)
+    print(result)
