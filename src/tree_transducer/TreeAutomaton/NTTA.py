@@ -118,7 +118,7 @@ class NTTA(TreeAutomaton):
     def union(self, other: NTTA) -> NTTA:
         """
         Returns the union of this top-down automaton and another top-down automaton.
-        The states and transitions are the products of the input automata.
+        The states and transitions are the disjointed states and transitions of the input automata.
         An NTTA is always returned even if both input automata are deterministic.
 
         Returns:
@@ -131,6 +131,32 @@ class NTTA(TreeAutomaton):
         new_states = [f"1_{s1}" for s1 in self.states] + [f"2_{s2}" for s2 in other.states]
         new_transitions = {(f"1_{k[0]}",k[1],k[2]):{tuple(f"1_{s}" for s in vi) for vi in v} for k,v in self.transitions.items()} | \
             {(f"2_{k[0]}",k[1],k[2]):{tuple(f"2_{s}" for s in vi) for vi in v} for k,v in other.transitions.items()}
+        return NTTA(new_states, new_final_states, new_symbols, new_transitions)
+
+    def intersection(self, other: NTTA) -> NTTA:
+        """
+        Returns the intersection of this top-down automaton and another top-down automaton.
+        The states and transitions are the products of the input automata.
+        An NTTA is always returned even if both input automata are deterministic.
+
+        Returns:
+            NTTA: the intersection of this top-down automaton and another top-down automaton
+        """
+        state_pairs = [(s1, s2) for s1 in self.states for s2 in other.states]
+        new_transitions = dict()
+        for (s1,s2) in state_pairs:
+            for self_key, self_val in self.transitions.items():
+                if self_key[0] != s1:
+                    continue
+                symbol = self_key[1]
+                rank = self_key[2]
+                for other_key, other_val in other.transitions.items():
+                    if other_key[1] != symbol or other_key[2] != rank:
+                        continue
+                    new_transitions[(f"{s1}_{s2}", symbol, rank)] = {tuple([f"{s_tup[i]}_{o_tup[i]}" for s_tup in self_val for o_tup in other_val for i in range(rank)])}
+        new_states = [f"{s1}_{s2}" for s1 in self.states for s2 in other.states]
+        new_final_states = [f"{s1}_{s2}" for s1 in self.states for s2 in other.states]
+        new_symbols = self.symbols.union(other.symbols)
         return NTTA(new_states, new_final_states, new_symbols, new_transitions)
 
     def __eq__(self, other: object) -> bool:

@@ -79,6 +79,17 @@ class NTTATests(unittest.TestCase):
             ('2_qB', 'B', 0): {()}}) 
         self.assertEqual(automaton1.union(automaton2), union)
 
+    #Returns intersection
+    def testIntersection(self):
+        automaton1 = NTTA(["qA","qB"],["qA"],["A"], {("qA","A",2):{("qA","qA"),("qA","qB")}, ("qA","A",0):{tuple()}})
+        automaton2 = NTTA(["qC"],["qC"],["A","S"], {("qC","A",1):{("qC",)}, ("qC","A",0):{tuple()}})
+        intersection = NTTA(['qA_qC', 'qB_qC'],
+                            ['qA_qC', 'qB_qC'],
+                            ["A","S"],
+                            {('qA_qC', 'A', 0): {tuple()}}
+        )
+        self.assertEqual(automaton1.intersection(automaton2), intersection)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NTTATests)
     runner = unittest.TextTestRunner()

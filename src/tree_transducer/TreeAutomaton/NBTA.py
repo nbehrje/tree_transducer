@@ -179,6 +179,62 @@ class NBTA(TreeAutomaton):
                 new_transitions[(new_children, k_s[1])] = new_val
         return NBTA(new_states, new_final_states, new_symbols, new_transitions)
 
+    def intersection(self, other: NBTA) -> NBTA:
+        """
+        Returns the intersection of this bottom-up automaton and another bottom-up automaton.
+        The states and transitions are the products of the input automata.
+        An NBTA is always returned even if both input automata are deterministic.
+
+        Returns:
+            NBTA: the intersection of this bottom-up automaton and another bottom-up automaton
+        """
+        new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
+        new_transitions = dict()
+        new_final_states = {f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states}
+        ranks = dict()
+        self_ranks = dict()
+        other_ranks = dict()
+        completed_transitions_self = copy.deepcopy(self.transitions)
+        completed_transitions_other = copy.deepcopy(other.transitions)
+        new_states = {f"{s1}_{s2}" for s1 in self.states for s2 in other.states}
+        for k in self.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            self_r = self_ranks.get(k[1], set()).copy()
+            self_r.add(len(k[0]))
+            self_ranks[k[1]] = self_r
+        for k in other.transitions.keys():
+            r = ranks.get(k[1], set()).copy()
+            r.add(len(k[0]))
+            ranks[k[1]] = r
+            other_r = other_ranks.get(k[1], set()).copy()
+            other_r.add(len(k[0]))
+            other_ranks[k[1]] = other_r
+        for symbol in ranks:
+            self_diff = ranks[symbol] - self_ranks.get(symbol, set())
+            for r in self_diff:
+                completed_transitions_self[(tuple(["%S%"] * r), symbol)] = {"%S%"}
+            other_diff = ranks[symbol] - other_ranks.get(symbol, set())
+            for r in other_diff:
+                completed_transitions_other[(tuple(["%S%"] * r), symbol)] = {"%S%"}
+        for k_s, v_s in completed_transitions_self.items():
+            for k_o, v_o in completed_transitions_other.items():
+                if not k_s[1] == k_o[1]:
+                    continue
+                if not len(k_s[0]) == len(k_o[0]):
+                    continue
+                new_children = tuple([f"{k_s[0][i]}_{k_o[0][i]}" for i in range(len(k_s[0]))])
+                new_val = set()
+                new_states.update(new_children)
+                for s1 in v_s:
+                    for s2 in v_o:
+                        s = f"{s1}_{s2}"
+                        new_val.add(s)
+                new_states.update(new_val)
+                new_transitions[(new_children, k_s[1])] = new_val
+        return NBTA(new_states, new_final_states, new_symbols, new_transitions)
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NBTA):
             return self.states == other.states and \
