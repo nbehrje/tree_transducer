@@ -151,12 +151,12 @@ class NBTT(TreeTransducer):
 
     def union(self, other: NBTT) -> NBTT:
         """
-        Returns the union of this bottom-up automaton and another bottom-up automaton.
-        The states and transitions are the products of the input automata.
-        An NBTA is always returned even if both input automata are deterministic.
+        Returns the union of this bottom-up transducer and another bottom-up transducer.
+        The states and transitions are the products of the input transducers.
+        An NBTT is always returned even if both input transducers are deterministic.
 
         Returns:
-            NBTA: the union of this bottom-up automaton and another bottom-up automaton
+            NBTT: the union of this bottom-up transducer and another bottom-up transducer
         """
         new_in_symbols = set(chain.from_iterable([self.in_symbols, other.in_symbols]))
         new_out_symbols = set(chain.from_iterable([self.out_symbols, other.out_symbols]))
@@ -209,6 +209,33 @@ class NBTT(TreeTransducer):
                         new_states.add(s)
                         if s1[0] in self.final_states or s2[0] in other.final_states:
                             new_final_states.add(s)
+                new_transitions[(new_children, k_s[1])] = new_val
+        return NBTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
+
+    def intersection(self, other: NBTT) -> NBTT:
+        new_in_symbols = self.in_symbols.union(other.in_symbols)
+        new_out_symbols = self.out_symbols.union(other.out_symbols)
+        new_transitions = dict()
+        new_final_states = {f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states}
+        completed_transitions_self = copy.deepcopy(self.transitions)
+        completed_transitions_other = copy.deepcopy(other.transitions)
+        new_states = {f"{s1}_{s2}" for s1 in self.states for s2 in other.states}
+        for k_s, v_s in completed_transitions_self.items():
+            for k_o, v_o in completed_transitions_other.items():
+                if not k_s[1] == k_o[1]:
+                    continue
+                if not len(k_s[0]) == len(k_o[0]):
+                    continue
+                new_children = tuple([f"{k_s[0][i]}_{k_o[0][i]}" for i in range(len(k_s[0]))])
+                new_val = []
+                new_states.update(new_children)
+                for s1 in v_s:
+                    for s2 in v_o:
+                        s = f"{s1[0]}_{s2[0]}"
+                        new_val.append((s, s1[1]))
+                        if (s, s2[1]) not in new_val:
+                            new_val.append((s, s2[1]))
+                        new_states.add(s)
                 new_transitions[(new_children, k_s[1])] = new_val
         return NBTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
 

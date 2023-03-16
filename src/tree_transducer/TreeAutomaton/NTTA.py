@@ -124,7 +124,7 @@ class NTTA(TreeAutomaton):
         Returns:
             NTTA: the union of this top-down automaton and another top-down automaton
         """
-        new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
+        new_symbols = self.symbols.union(other.symbols)
         new_transitions = dict()
         new_final_states = {f"1_{s1}" for s1 in self.final_states}
         new_final_states.update({f"2_{s2}" for s2 in other.final_states})
@@ -153,9 +153,16 @@ class NTTA(TreeAutomaton):
                 for other_key, other_val in other.transitions.items():
                     if other_key[1] != symbol or other_key[2] != rank:
                         continue
-                    new_transitions[(f"{s1}_{s2}", symbol, rank)] = {tuple([f"{s_tup[i]}_{o_tup[i]}" for s_tup in self_val for o_tup in other_val for i in range(rank)])}
+                    new_children_set = set()
+                    for s_tup in self_val:
+                        for o_tup in other_val:
+                            if rank == 0:
+                                new_children_set.add(tuple())
+                            for i in range(rank):
+                                new_children_set.add(tuple([f"{s_tup[i]}_{o_tup[i]}"]))
+                    new_transitions[(f"{s1}_{s2}", symbol, rank)] = new_children_set
         new_states = [f"{s1}_{s2}" for s1 in self.states for s2 in other.states]
-        new_final_states = [f"{s1}_{s2}" for s1 in self.states for s2 in other.states]
+        new_final_states = [f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states]
         new_symbols = self.symbols.union(other.symbols)
         return NTTA(new_states, new_final_states, new_symbols, new_transitions)
 

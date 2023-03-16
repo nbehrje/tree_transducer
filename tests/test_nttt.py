@@ -54,8 +54,29 @@ class NTTTTests(unittest.TestCase):
     def testUnion(self):
         transducer1 = NTTT(["qA"],["qA"],["A"],["A"], {("qA","A",2):{(("qA","qA"),Tree("A", [VarLeaf(1),VarLeaf(0)]))}, ("qA","A",0):{(tuple(),Tree("A"))}})
         transducer2 = NTTT(["qB"],["qB"],["B"],["B"], {("qB","B",1):{(("qB",),Tree("B"))}, ("qB","B",0):{(tuple(),Tree("B"))}})
-        union = transducer1.union(transducer2)
+        union = NTTT(['1_qA', '2_qB'],
+                     ['1_qA', '2_qB'],
+                     ["A","B"],
+                     ["A","B"],
+                     {('1_qA', 'A', 2): {(('1_qA', '1_qA'), Tree("A",[VarLeaf(1),VarLeaf(0)]))},
+                     ('1_qA', 'A', 0): {(tuple(), Tree("A"))},
+                     ('2_qB', 'B', 1): {(('2_qB',), Tree("B"))},
+                     ('2_qB', 'B', 0): {(tuple(), Tree("B"))}}
+        )
         self.assertEqual(transducer1.union(transducer2), union)
+
+    #Returns intersection
+    def testIntersection(self):
+        transducer1 = NTTT(["qA","qB"],["qA"],["A"],["A","B"], {("qA","A",1):{(("qA",),Tree("A", [VarLeaf(0)])),(("qB",),Tree("B", [VarLeaf(0)]))}, ("qA","A",0):{(tuple(),Tree("A"))}})
+        transducer2 = NTTT(["qA"],["qA"],["A"],["A"], {("qA","A",1):{(("qA",),Tree("A", [VarLeaf(0)]))}, ("qA","A",0):{(tuple(),Tree("A"))}})
+        intersection = NTTT(['qA_qA', 'qB_qA'],
+                            ['qA_qA'],
+                            ["A"],
+                            ["A","B"],
+                            {('qA_qA', 'A', 1): {(('qA_qA',), Tree("A", [VarLeaf(0)])),(('qB_qA',), Tree("B", [VarLeaf(0)])), (('qB_qA',), Tree("A",[VarLeaf(0)]))},
+                                ('qA_qA', 'A', 0): {(tuple(), Tree("A"))}}
+        )
+        self.assertEqual(transducer1.intersection(transducer2), intersection)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NTTTTests)

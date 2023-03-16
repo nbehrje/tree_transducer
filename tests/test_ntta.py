@@ -81,12 +81,13 @@ class NTTATests(unittest.TestCase):
 
     #Returns intersection
     def testIntersection(self):
-        automaton1 = NTTA(["qA","qB"],["qA"],["A"], {("qA","A",2):{("qA","qA"),("qA","qB")}, ("qA","A",0):{tuple()}})
-        automaton2 = NTTA(["qC"],["qC"],["A","S"], {("qC","A",1):{("qC",)}, ("qC","A",0):{tuple()}})
-        intersection = NTTA(['qA_qC', 'qB_qC'],
-                            ['qA_qC', 'qB_qC'],
-                            ["A","S"],
-                            {('qA_qC', 'A', 0): {tuple()}}
+        automaton1 = NTTA(["qA","qB"],["qA"],["A","B"], {("qA","A",1):{("qA",),("qB",)}, ("qA","A",0):{tuple()}})
+        automaton2 = NTTA(["qC"],["qC"],["A"], {("qC","A",1):{("qC",)}, ("qC","A",0):{tuple()}})
+        intersection = NTTA(['qA_qC','qB_qC'],
+                            ['qA_qC'],
+                            ["A"],
+                            {('qA_qC', 'A', 1): {("qA_qC",),("qB_qC",)},
+                            ("qA_qC","A",0):{tuple()}}
         )
         self.assertEqual(automaton1.intersection(automaton2), intersection)
 

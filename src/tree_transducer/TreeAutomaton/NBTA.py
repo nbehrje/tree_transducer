@@ -188,36 +188,12 @@ class NBTA(TreeAutomaton):
         Returns:
             NBTA: the intersection of this bottom-up automaton and another bottom-up automaton
         """
-        new_symbols = set(chain.from_iterable([self.symbols, other.symbols]))
+        new_symbols = self.symbols.union(other.symbols)
         new_transitions = dict()
         new_final_states = {f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states}
-        ranks = dict()
-        self_ranks = dict()
-        other_ranks = dict()
         completed_transitions_self = copy.deepcopy(self.transitions)
         completed_transitions_other = copy.deepcopy(other.transitions)
         new_states = {f"{s1}_{s2}" for s1 in self.states for s2 in other.states}
-        for k in self.transitions.keys():
-            r = ranks.get(k[1], set()).copy()
-            r.add(len(k[0]))
-            ranks[k[1]] = r
-            self_r = self_ranks.get(k[1], set()).copy()
-            self_r.add(len(k[0]))
-            self_ranks[k[1]] = self_r
-        for k in other.transitions.keys():
-            r = ranks.get(k[1], set()).copy()
-            r.add(len(k[0]))
-            ranks[k[1]] = r
-            other_r = other_ranks.get(k[1], set()).copy()
-            other_r.add(len(k[0]))
-            other_ranks[k[1]] = other_r
-        for symbol in ranks:
-            self_diff = ranks[symbol] - self_ranks.get(symbol, set())
-            for r in self_diff:
-                completed_transitions_self[(tuple(["%S%"] * r), symbol)] = {"%S%"}
-            other_diff = ranks[symbol] - other_ranks.get(symbol, set())
-            for r in other_diff:
-                completed_transitions_other[(tuple(["%S%"] * r), symbol)] = {"%S%"}
         for k_s, v_s in completed_transitions_self.items():
             for k_o, v_o in completed_transitions_other.items():
                 if not k_s[1] == k_o[1]:

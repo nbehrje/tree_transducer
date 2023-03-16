@@ -78,6 +78,18 @@ class NBTTTests(unittest.TestCase):
         )
         self.assertEqual(transducer1.union(transducer2), union)
 
+    #Returns intersection
+    def testIntersection(self):
+        transducer1 = NBTT(["qA","qB"],["qA"],["A","B"],["A","B"], {(("qA","qA"),"A"):[("qA",Tree("A", [VarLeaf(0),VarLeaf(1)]))], (tuple(),"A"):[("qA",Tree("A"))], (tuple(),"B"):[("qB",Tree("B"))], (("qB",),""):[("qA",Tree("A"))]})
+        transducer2 = NBTT(["qA"],["qA"],["A"],["A"], {(("qA","qA"),"A"):[("qA",Tree("A", [VarLeaf(0),VarLeaf(1)]))], (tuple(),"A"):[("qA",Tree("A"))]})
+        intersection = NBTT(["qA_qA","qB_qA"],
+                            ["qA_qA"],
+                            ["A","B"],
+                            ["A","B"],
+                            {(("qA_qA","qA_qA"),"A"):[("qA_qA", Tree("A", [VarLeaf(0), VarLeaf(1)]))], (tuple(),"A"):[("qA_qA",Tree("A"))]}
+        )
+        self.assertEqual(transducer1.intersection(transducer2), intersection)
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NBTTTests)

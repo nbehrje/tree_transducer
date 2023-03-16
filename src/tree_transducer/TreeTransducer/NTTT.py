@@ -139,14 +139,50 @@ class NTTT(TreeTransducer):
         Returns:
             NTTT: the union of this top-down transducer and another top-down transducer
         """
-        new_in_symbols = set(chain.from_iterable([self.in_symbols, other.in_symbols]))
-        new_out_symbols = set(chain.from_iterable([self.out_symbols, other.out_symbols]))
+        new_in_symbols = self.in_symbols.union(other.in_symbols)
+        new_out_symbols = self.out_symbols.union(other.out_symbols)
         new_transitions = dict()
         new_final_states = {f"1_{s1}" for s1 in self.final_states}
         new_final_states.update({f"2_{s2}" for s2 in other.final_states})
         new_states = [f"1_{s1}" for s1 in self.states] + [f"2_{s2}" for s2 in other.states]
         new_transitions = {(f"1_{k[0]}",k[1],k[2]):{(tuple(f"1_{s}" for s in vi[0]),vi[1]) for vi in v} for k,v in self.transitions.items()} | \
             {(f"2_{k[0]}",k[1],k[2]):{(tuple(f"2_{s}" for s in vi[0]),vi[1]) for vi in v} for k,v in other.transitions.items()}
+        return NTTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
+
+    def intersection(self, other: NTTT) -> NTTT:
+        """
+        Returns the intersection of this top-down transducer and another top-down transducer.
+        The states and transitions are the products of the input automata.
+        An NTTT is always returned even if both input transducers are deterministic.
+
+        Returns:
+            NTTT: the intersection of this top-down transducer and another top-down transducer
+        """
+        state_pairs = [(s1, s2) for s1 in self.states for s2 in other.states]
+        new_transitions = dict()
+        for (s1,s2) in state_pairs:
+            for self_key, self_val in self.transitions.items():
+                if self_key[0] != s1:
+                    continue
+                symbol = self_key[1]
+                rank = self_key[2]
+                for other_key, other_val in other.transitions.items():
+                    if other_key[1] != symbol or other_key[2] != rank:
+                        continue
+                    new_children_set = set()
+                    for s_tup in self_val:
+                        for o_tup in other_val:
+                            if rank == 0:
+                                new_children_set.add((tuple(), s_tup[1]))
+                                new_children_set.add((tuple(), o_tup[1]))
+                            for i in range(rank):
+                                new_children_set.add((tuple([f"{s_tup[0][i]}_{o_tup[0][i]}"]), s_tup[1]))
+                                new_children_set.add((tuple([f"{s_tup[0][i]}_{o_tup[0][i]}"]), o_tup[1]))
+                    new_transitions[(f"{s1}_{s2}", symbol, rank)] = new_children_set
+        new_states = [f"{s1}_{s2}" for s1 in self.states for s2 in other.states]
+        new_final_states = [f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states]
+        new_in_symbols = self.in_symbols.union(other.in_symbols)
+        new_out_symbols = self.out_symbols.union(other.out_symbols)
         return NTTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
 
     def __eq__(self, other: object) -> bool:

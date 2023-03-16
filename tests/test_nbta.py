@@ -56,14 +56,11 @@ class NBTATests(unittest.TestCase):
     #Returns intersection
     def testIntersection(self):
         automaton1 = NBTA(["qA"],["qA"],["A"], {(("qA","qA"),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
-        automaton2 = NBTA(["qB"],["qB"],["B"], {(("qB",),"B"):{"qB"}, (tuple(),"B"):{"qB"}})
-        intersection = NBTA(["qA_qB", "qA_%S%", "%S%_qB"],
-                    ["qA_qB"],
-                    ["A", "B"],
-                    {(("qA_%S%","qA_%S%"),"A"):{"qA_%S%"},
-                        (tuple(),"A"):{"qA_%S%"},
-                        (("%S%_qB",),"B"):{"%S%_qB"},
-                        (tuple(),"B"):{"%S%_qB"}})
+        automaton2 = NBTA(["qA"],["qA"],["A"], {(("qA",),"A"):{"qA"}, (tuple(),"A"):{"qA"}})
+        intersection = NBTA(["qA_qA"],
+                    ["qA_qA"],
+                    ["A"],
+                    {(tuple(),"A"):{"qA_qA"}})
         self.assertEqual(automaton1.intersection(automaton2), intersection)
 
 if __name__ == '__main__':
