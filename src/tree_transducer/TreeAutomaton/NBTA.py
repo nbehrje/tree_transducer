@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from ..Tree import Tree
 from .TreeAutomaton import TreeAutomaton
-from itertools import product, chain
+from itertools import product, chain, combinations
 from collections import defaultdict
 import copy
 
@@ -210,6 +210,101 @@ class NBTA(TreeAutomaton):
                 new_states.update(new_val)
                 new_transitions[(new_children, k_s[1])] = new_val
         return NBTA(new_states, new_final_states, new_symbols, new_transitions)
+
+    """
+    Returns a deterministic automaton equivalent to this automaton
+
+    This algorithm is largely derived from the determinization algorithm used in LETHAL (https://lethal.sourceforge.net/)
+
+    Returns:
+        NBTA: A deterministic automaton equivalent to this automaton
+    """
+    def determinize(self) -> NBTA:
+        power_states = []
+        power_finals = []
+        new_transitions = dict()
+
+        arities = dict()
+        for key in self.transitions.keys():
+            arity = len(key[0])
+            symbol = key[1]
+            if arity in arities:
+                arities[arity].add(symbol)
+            else:
+                arities[arity] = {symbol}
+        if not 0 in arities:
+            return NBTA([],[],[],{})
+
+        pos_arities = list(arities.keys() - {0})
+        stack = []
+        
+        for constant in arities[0]:
+            dest_state, is_final = self._get_dest_states(constant, [])
+            
+            if dest_state not in power_states:
+                power_states.append(dest_state)
+                if is_final:
+                    power_finals.append(dest_state)
+                for ar in pos_arities:
+                    subset_list = list(map(lambda t: tuple(t), combinations(power_states+[dest_state], ar)))
+                    subset_list = list(filter(lambda s: dest_state in s, subset_list))
+                    for state in subset_list:
+                        for symbol in arities[ar]:
+                            stack.append((symbol, state))
+            key = (tuple(), constant)
+            val = {"_".join(sorted(list(dest_state)))}
+            new_transitions[key] = val
+
+        while stack:
+            symbol, state = stack.pop()
+            dest_state, is_final = self._get_dest_states(symbol, state)
+            if not dest_state:
+                continue
+            key = (tuple("_".join(sorted(list(s))) for s in state), symbol)
+            val = {"_".join(sorted(list(dest_state)))}
+            new_transitions[key] = val
+            if dest_state not in power_states:
+                power_states.append(dest_state)
+                if is_final:
+                    power_finals.append(dest_state)
+                for ar in pos_arities:
+                    subset_list = list(map(lambda t: tuple(t), combinations(power_states+[dest_state], ar)))
+                    subset_list = list(filter(lambda s: dest_state in s, subset_list))
+                    for state in subset_list:
+                        for symbol in arities[ar]:
+                            stack.append((symbol, state))
+        return NBTA(
+            states = {"_".join(sorted(list(s))) for s in power_states},
+            final_states = {"_".join(sorted(list(s))) for s in power_states},
+            symbols = self.symbols,
+            transitions = new_transitions
+        )
+
+    """
+    Calculates the set of destination states q in this automaton such that there is a rule f(q1...qn) -> q and qi is in the ith set in the input
+
+    Returns:
+        A tuple containing a set of states and a boolean that is true if a final state is in the set of returned states
+    """
+    def _get_dest_states(self, symbol, state_set) -> tuple:
+        dest_states = set()
+        final = False
+        for key,val in self.transitions.items():
+            if key[1] != symbol or not symbol:
+                continue
+            is_subset = True
+            len_rule = len(key[0])
+            if len_rule and len_rule == len(state_set):
+                for i in range(len_rule):
+                    if not key[0][i] in state_set[i]:
+                        is_subset = False
+                        break
+            if is_subset:
+                dest_states.update(val)
+                if not final and self.final_states.intersection(val):
+                    final = True
+        print(dest_states)
+        return (dest_states, final)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NBTA):

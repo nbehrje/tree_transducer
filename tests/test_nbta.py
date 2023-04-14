@@ -63,6 +63,25 @@ class NBTATests(unittest.TestCase):
                     {(tuple(),"A"):{"qA_qA"}})
         self.assertEqual(automaton1.intersection(automaton2), intersection)
 
+    #Returns deterministic automaton
+    def testDeterminizeEmpty(self):
+        automaton1 = NBTA(["qA","qB"],["qA"],["A"],{(("qA","qA"),"A"):{"qA","qB"}})
+        self.assertEqual(automaton1.determinize(), NBTA([],[],[],{}))
+
+    #Returns deterministic automaton
+    def testDeterminizeMultipleTransitions(self):
+        automaton1 = NBTA(["qA","qB"],["qA"],["A"],{(("qA","qA"),"A"):{"qA","qB"}, (tuple(),"A"):{"qA","qB"}})
+        determinized = NBTA(['qA_qB'], ["qA_qB"], ["A"],{(("qA_qB","qA_qB"),"A"):{"qA_qB"}, (tuple(),"A"):{"qA_qB"}})
+        self.assertEqual(automaton1.determinize(), determinized)
+
+    #Returns deterministic automaton
+    def testDeterminizeEpsilon(self):
+        automaton1 = NBTA(["qA","qB"],["qA"],["A"],{(("qA","qA"),"A"):{"qA","qB"},
+                                                    (tuple(),"A"):{"qA","qB"},
+                                                    (("qA",),""):{"qA"}})
+        determinized = NBTA(['qA_qB'], ["qA_qB"], ["A"],{(("qA_qB","qA_qB"),"A"):{"qA_qB"}, (tuple(),"A"):{"qA_qB"}})
+        self.assertEqual(automaton1.determinize(), determinized)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NBTATests)
     runner = unittest.TextTestRunner()
