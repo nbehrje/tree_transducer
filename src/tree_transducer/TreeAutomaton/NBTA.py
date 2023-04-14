@@ -303,7 +303,6 @@ class NBTA(TreeAutomaton):
                 dest_states.update(val)
                 if not final and self.final_states.intersection(val):
                     final = True
-        print(dest_states)
         return (dest_states, final)
 
     def __eq__(self, other: object) -> bool:
