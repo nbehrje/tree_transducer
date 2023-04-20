@@ -213,6 +213,12 @@ class NBTT(TreeTransducer):
         return NBTT(new_states, new_final_states, new_in_symbols, new_out_symbols, new_transitions)
 
     def intersection(self, other: NBTT) -> NBTT:
+        """
+        Returns the intersection of this transducer and another transducer.
+
+        Returns:
+            NBTT: the intersection of this bottom-up transducer and another bottom-up transducer
+        """
         new_in_symbols = self.in_symbols.union(other.in_symbols)
         new_out_symbols = self.out_symbols.union(other.out_symbols)
         new_transitions = dict()

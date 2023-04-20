@@ -32,6 +32,23 @@ class DBTATests(unittest.TestCase):
     def testNondeterministic(self):
         self.assertRaises(ValueError, DBTA, ["qA", "qB"], ["qA"], ["A"], {(("qA",), ""): {"qA", "qB"}})
 
+    #Returns minimized automaton
+    def testMinimize(self):
+        automaton = DBTA(["qA","qB","qC"],["qA"], ["A","B","C"], {(("qA",),"A"): {"qA"},
+                                                         (tuple(),"A"): {"qA"},
+                                                         (tuple(),"B"): {"qB"},
+                                                         (("qB",),"B"): {"qB"},
+                                                         (tuple(),"C"): {"qC"},
+                                                         (("qC","qC"),"C"): {"qC"}
+                                                        })
+        minimized = DBTA(["qA","qB_qC"],["qA"], ["A","B","C"], {(('qA',), 'A'): {'qA'},
+                                                                  ((), 'A'): {'qA'},
+                                                                  ((), 'B'): {'qB_qC'},
+                                                                  (('qB_qC',), 'B'): {'qB_qC'},
+                                                                  ((), 'C'): {'qB_qC'},
+                                                                  (('qB_qC', 'qB_qC'), 'C'): {'qB_qC'}})
+        self.assertEqual(automaton.minimize(), minimized)
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(DBTATests)
     runner = unittest.TextTestRunner()
