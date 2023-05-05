@@ -31,8 +31,8 @@ class DBTA(NBTA):
         """
         rule_pairs = dict()
         eq_rel = dict()
-        for q1 in self.states:
-            for q2 in self.states:
+        for q1 in sorted(self.states):
+            for q2 in sorted(self.states):
                 rule_pairs[(q1,q2)] = self._get_rule_pairs(q1,q2)
                 if (q1 in self.final_states and q2 not in self.final_states) or \
                     (q1 not in self.final_states and q2 in self.final_states):
@@ -61,7 +61,7 @@ class DBTA(NBTA):
         new_finals = set()
 
         eq_class = dict()
-        for q1 in self.states:
+        for q1 in sorted(self.states):
             in_eq_class = False
             for q2 in eq_class:
                 if eq_rel[(q1,q2)]:
@@ -72,7 +72,7 @@ class DBTA(NBTA):
                     break
 
             if not in_eq_class:
-                new_eq_class = [q2 for q2 in self.states if eq_rel[(q1,q2)]]
+                new_eq_class = [q2 for q2 in sorted(self.states) if eq_rel[(q1,q2)]]
                 new_state = "_".join(new_eq_class)
                 eq_class[q1] = new_state
                 if q1 in self.final_states:
