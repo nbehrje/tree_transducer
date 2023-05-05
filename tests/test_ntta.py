@@ -91,6 +91,37 @@ class NTTATests(unittest.TestCase):
         )
         self.assertEqual(automaton1.intersection(automaton2), intersection)
 
+    #Returns NTTA for CFG
+    def testCFG(self):
+        cfg = """
+            S -> a b
+            S -> a S b
+            S -> a R b
+            R -> b a
+            R -> b S a
+            R -> b R a
+        """
+        automaton = NTTA({'qa', 'qS', 'qb', 'qR'},
+                        {'qS', 'qR'},
+                        ["S","R","a","b"],
+                        {('qS', 'S', 2): {('qa', 'qb')},
+                         ('qS', 'S', 3): {('qa', 'qS', 'qb'), ('qa', 'qR', 'qb')},
+                         ('qR', 'R', 2): {('qb', 'qa')},
+                         ('qR', 'R', 3): {('qb', 'qR', 'qa'), ('qb', 'qS', 'qa')}})
+        self.assertEqual((NTTA.from_cfg(cfg, {"S","R"}, {"a","b"})),automaton)
+
+    #Raises invalid CFG error
+    def testInvalidCFG(self):
+        self.assertRaises(ValueError,NTTA.from_cfg,"""
+            S > a b
+        """, {"S"}, {"a","b"})
+        self.assertRaises(ValueError,NTTA.from_cfg,"""
+            -> a b
+        """, {"S"}, {"a","b"})
+        self.assertRaises(ValueError,NTTA.from_cfg,"""
+           S S -> a b
+        """, {"S"}, {"a","b"})
+
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(NTTATests)
     runner = unittest.TextTestRunner()

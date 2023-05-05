@@ -8,6 +8,7 @@ from .TreeAutomaton import TreeAutomaton
 from itertools import product, chain
 from collections import defaultdict
 import copy
+import re
 
 class NTTA(TreeAutomaton):
     """
@@ -121,6 +122,8 @@ class NTTA(TreeAutomaton):
         The states and transitions are the disjointed states and transitions of the input automata.
         An NTTA is always returned even if both input automata are deterministic.
 
+        Args:
+            other: another NTTA
         Returns:
             NTTA: the union of this top-down automaton and another top-down automaton
         """
@@ -139,6 +142,8 @@ class NTTA(TreeAutomaton):
         The states and transitions are the products of the input automata.
         An NTTA is always returned even if both input automata are deterministic.
 
+        Args:
+            other: another NTTA
         Returns:
             NTTA: the intersection of this top-down automaton and another top-down automaton
         """
@@ -165,6 +170,60 @@ class NTTA(TreeAutomaton):
         new_final_states = [f"{s1}_{s2}" for s1 in self.final_states for s2 in other.final_states]
         new_symbols = self.symbols.union(other.symbols)
         return NTTA(new_states, new_final_states, new_symbols, new_transitions)
+
+    def from_cfg(cfg: str, starts:Iterable, terminals:Iterable) -> NTTA:
+        """
+        Creates an automaton from a CFG
+        The input CFG must be a string with newline-delimited rules in the following form:
+        S -> a T b
+
+        Args:
+            cfg: a context-free grammar as a string
+            starts: the starting symbols in the CFG
+            terminals: the terminal symbols in the CFG
+
+        Returns:
+            NTTA: a top-down automaton representing the derivation tree of the CFG
+        """
+        if not starts or not terminals:
+            return NTTA({},{},{},{})
+        
+        rules = list(map(lambda s: s.strip(), cfg.strip().split("\n")))
+        if not rules:
+            raise ValueError("No rules input as CFG")
+        
+        states = set()
+        final_states = set()
+        symbols = set()
+        transitions = dict()
+
+        valid = re.compile("^\w+(\s+)->\s*\w+(\s+\w+)*$")
+        for rule in rules:
+            if not valid.match(rule):
+                raise ValueError(f"Invalid CFG rule: {rule}")
+            l, r = rule.split("->")
+            parent_symb = l.strip()
+            symbols.add(parent_symb)
+            parent_state = f"q{parent_symb}"
+            states.add(parent_state)
+            if parent_symb in starts:
+                final_states.add(parent_state)
+            child_symbs = tuple(map(lambda s: s.strip(), r.split()))
+            child_states = tuple([f"q{symb}" for symb in child_symbs])
+            for child_symb in child_symbs:
+                symbols.add(child_symb)
+            for child_state in child_states:
+                states.add(child_state)
+            key = (parent_state, parent_symb, len(child_symbs))
+            if key in transitions:
+                transitions[key].add(child_states)
+            else:
+                transitions[key] = {child_states}
+        for symbol in symbols:
+            if symbols in terminals:
+                transitions[(f"q{symbol}",symbol,0)] = {tuple()}
+            
+        return NTTA(states, final_states, symbols, transitions)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, NTTA):
