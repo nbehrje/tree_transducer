@@ -113,3 +113,20 @@ class DBTA(NBTA):
                 if (diff_ct == 0 and q1 == q2) or (diff_ct == 1 and k1[0][q_idx] == q1 and k2[0][q_idx] == q2):
                     pairs.append(((k1,self.transitions[k1]),(k2,self.transitions[k2])))
         return pairs
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, DBTA):
+            return self.states == other.states and \
+                    self.final_states == other.final_states and \
+                    self.transitions == other.transitions
+        return False
+    
+    def __str__(self) -> str:
+        return f"DBTA(States: {self.states}\n \
+            Final States: {self.final_states}\n \
+            Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"DBTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"

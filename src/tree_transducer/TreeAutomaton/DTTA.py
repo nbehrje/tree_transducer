@@ -52,3 +52,20 @@ class DTTA(NTTA):
         key = (state, tree.value, len(tree.children))
         val = self.transitions.get(key, None)
         return val is not None and all(self._accept_helper(next(iter(val))[c],tree.children[c]) for c in range(len(tree.children)))
+    
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, DTTA):
+            return self.states == other.states and \
+                    self.final_states == other.final_states and \
+                    self.transitions == other.transitions
+        return False
+
+    def __str__(self) -> str:
+        return f"DTTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
+
+    def __repr__(self) -> str:
+        return f"DTTA(States: {self.states}\n \
+                Final States: {self.final_states}\n \
+                Transitions: {self.transitions})"
