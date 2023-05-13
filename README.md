@@ -95,20 +95,20 @@ DBTA(States: {'qS', 'qa', 'qb'}
 This nondeterministic bottom-up automaton accepts trees that represent derivations for the context-free grammar {S -> a b; S -> a S b} or are leaves of a[] or b[]:
 ```
 >>> NBTA(
-  states = {"qS", "qa", "qb"},
-  final_states = {"qS"},
+  states = {"qS", "qa", "qb", "qL"},
+  final_states = {"qS","qL"},
   symbols = {"S","a","b"},
   transitions = {
     (("qa","qb"), "S"): {"qS"},
     (("qa","qS","qb"), "S"): {"qS"},
-    (tuple(), "a"): {"qa", "qS"},
-    (tuple(), "b"): {"qb", "qS"}
+    (tuple(), "a"): {"qa", "qL"},
+    (tuple(), "b"): {"qb", "qL"}
   }
 )
 
 NBTA(States: {'qb', 'qS', 'qa'}
                  Final States: {'qS'}
-                 Transitions: {(('qa', 'qb'), 'S'): {'qS'}, (('qa', 'qS', 'qb'), 'S'): {'qS'}, ((), 'a'): {'qS', 'qa'}, ((), 'b'): {'qS', 'qb'}})
+                 Transitions: {(('qa', 'qb'), 'S'): {'qS'}, (('qa', 'qS', 'qb'), 'S'): {'qS'}, ((), 'a'): {'qL', 'qa'}, ((), 'b'): {'qL', 'qb'}})
 ```
 
 This deterministic top-down automaton accepts trees that represent derivations for the context-free grammar {S -> a b; S -> a S b}:
