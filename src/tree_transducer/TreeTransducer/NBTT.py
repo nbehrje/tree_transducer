@@ -4,7 +4,7 @@ Nondeterministic finite-state bottom-up tree transducer module
 from __future__ import annotations
 from collections.abc import Iterable
 from .TreeTransducer import TreeTransducer
-from src.tree_transducer.Tree import Tree, VarLeaf
+from ..Tree import Tree, VarLeaf
 from itertools import product, chain
 import copy
 

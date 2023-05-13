@@ -3,7 +3,7 @@ Deterministic finite-state bottom-up tree transducer module
 """
 from collections.abc import Iterable
 from .NBTT import NBTT
-from src.tree_transducer.Tree import Tree
+from ..Tree import Tree
 
 class DBTT(NBTT):
     """

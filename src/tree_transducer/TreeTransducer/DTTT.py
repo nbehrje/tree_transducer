@@ -3,7 +3,7 @@ Deterministic finite-state top-down tree transducer module
 """
 from collections.abc import Iterable
 from .NTTT import NTTT
-from src.tree_transducer.Tree import Tree, VarLeaf
+from ..Tree import Tree, VarLeaf
 
 class DTTT(NTTT):
     """
